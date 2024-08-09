@@ -25,10 +25,13 @@
 ;---------------------------------------------------
 ; 4 charsets for fine scroll
 font1
-    ins 'artwork/dino.fnt'  ; first charset
+    ins 'artwork/dino1.fnt'  ; 1 charset
 font2 = font1+$400
+    ins 'artwork/dino2.fnt'  ; 2 charset
 font3 = font2+$400
+    ins 'artwork/dino3.fnt'  ; 3 charset
 font4 = font3+$400
+    ins 'artwork/dino4.fnt'  ; 4 charset
     org font4+$400
 ; screen data
 ; 8 lines 256bytes each
@@ -66,7 +69,7 @@ line8_addr
 
 ;---------------------------------------------------
 FirstSTART
-    jsr GenerateCharsets
+    ;jsr GenerateCharsets
     jsr SetGameScreen
     ldx #5 ; position
     ldy #0  ; shape
@@ -84,6 +87,20 @@ FirstSTART
     ldy #4  ; shape
     jsr ShowDino
    
+EndLoop
+    wait                   ; or waitRTC ?
+    wait                   ; or waitRTC ?
+    mva #>font2 chbas
+    wait                   ; or waitRTC ?
+    wait                   ; or waitRTC ?
+    mva #>font3 chbas
+    wait                   ; or waitRTC ?
+    wait                   ; or waitRTC ?
+    mva #>font4 chbas
+    wait                   ; or waitRTC ?
+    wait                   ; or waitRTC ?
+    mva #>font1 chbas
+    jmp EndLoop
     halt
     rts
 
