@@ -86,20 +86,28 @@ FirstSTART
     ldx #25 ; position
     ldy #4  ; shape
     jsr ShowDino
-   
+    mva #$50 screen+$700+32
 EndLoop
     wait                   ; or waitRTC ?
-    wait                   ; or waitRTC ?
+    key
     mva #>font2 chbas
+    waitRTC                   ; or waitRTC ?
+    mva #3 hscrol
     wait                   ; or waitRTC ?
-    wait                   ; or waitRTC ?
+    key
     mva #>font3 chbas
+    waitRTC                   ; or waitRTC ?
+    mva #2 hscrol
     wait                   ; or waitRTC ?
-    wait                   ; or waitRTC ?
+    key
     mva #>font4 chbas
+    waitRTC                   ; or waitRTC ?
+    mva #1 hscrol
     wait                   ; or waitRTC ?
-    wait                   ; or waitRTC ?
+    key
     mva #>font1 chbas
+    waitRTC                   ; or waitRTC ?
+    mva #4 hscrol
     jmp EndLoop
     halt
     rts
