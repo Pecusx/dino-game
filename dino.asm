@@ -1,4 +1,5 @@
 SCR_HEIGHT = 8
+WORLD_LENGTH = 64
 
 ;  No internet
 ;---------------------------------------------------
@@ -53,11 +54,13 @@ line:1_addr
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
-    :64 .byte 0 ; ground
+    :WORLD_LENGTH .byte 0 ; ground
 ;---------------------------------------------------
 FirstSTART
     jsr GenerateCharsets
     jsr ClearWorld
+    mva #0 diff_level
+    
     ; test only (some object in the world)
     lda #1  ;bird0
     sta WorldTable+10
@@ -140,7 +143,7 @@ CopyLoop
 .endp
 ;-----------------------------------------------
 .proc ClearWorld
-    ldy #63 ; world size
+    ldy #WORLD_LENGTH-1 ; world size
     lda #0  ; ground
 @   sta WorldTable,y
     dey
@@ -148,7 +151,7 @@ CopyLoop
     rts
 .endp
 .proc ClearScreen
-    ldy #64
+    ldy #WORLD_LENGTH ; TODO: shouldn't be -1?
     lda #0
 ClearLoop
     sta screen+$700,y
@@ -173,7 +176,7 @@ ToScreenLoop
 NothingToDraw
     inc temp_b
     ldx temp_b
-    cpx #64
+    cpx #WORLD_LENGTH
     bne ToScreenLoop
     rts
 .endp
@@ -184,12 +187,35 @@ Shift
     lda WorldTable+1,y
     sta WorldTable,y
     iny
-    cpy #63
+    cpy #WORLD_LENGTH-1
     bne Shift
     lda #0  ;ground
     sta WorldTable,y
     ; now we can insert random object to world end
     
+    ; check if there is enough of the gap between obstacles
+    
+    ; get the gap for the given difficulty level
+    ldx diff_level
+    lda #WORLD_LENGTH
+    sec
+    sbc diff_object_gap,x
+    tax 
+
+    ; is there a gap?
+@
+    lda WorldTable,x
+    bne noInsert
+    inx
+    cpx #WORLD_LENGTH
+    bne @-
+    ;all zeroes
+insertObject
+    mva #1 WorldTable+WORLD_LENGTH-2
+    
+    
+    
+noInsert    
     rts
 .endp
 ;-----------------------------------------------
