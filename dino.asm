@@ -6,7 +6,8 @@ SCR_HEIGHT = 8
 
 ;---------------------------------------------------
 ; Zpage variables
-    .zpvar temp_w     .word = $80
+    .zpvar temp_w   .word = $80
+    .zpvar temp_b   .byte
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
@@ -49,10 +50,22 @@ line:1_addr
     .endr
     .byte JVB   
     .word GameDL
-
+;---------------------------------------------------
+; World table without dino
+WorldTable
+    :64 .byte 0 ; ground
 ;---------------------------------------------------
 FirstSTART
-    ;jsr GenerateCharsets
+    jsr GenerateCharsets
+    jsr ClearWorld
+    ; test only (some object in the world)
+    lda #1  ;bird0
+    sta WorldTable+10
+    lda #4  ;cactus
+    sta WorldTable+20
+    lda #4+$80  ; cactus (second char)
+    sta WorldTable+21
+    ;
     jsr SetGameScreen
     ldx #5 ; position
     ldy #0  ; shape
@@ -71,6 +84,11 @@ FirstSTART
     jsr ShowDino
     mva #$50 screen+$700+32
 EndLoop
+    jsr WorldShift
+    jsr WorldToScreen
+    ldx #5 ; position
+    ldy #0  ; shape
+    jsr ShowDino
     wait                   ; or waitRTC ?
     key
     mva #>font2 chbas
@@ -100,17 +118,13 @@ EndLoop
 ; By copying and horizontal shift dino
 ;-----------------------------------------------
 .proc GenerateCharsets
-    ; copy charset 1 to 2,3 and 4
+    ; copy charset 1 to 2,3 and 4 (but not dino chars)
     ldy #0
 CopyLoop
     lda font1,y
     sta font2,y
     sta font3,y
     sta font4,y
-    lda font1+$100,y
-    sta font2+$100,y
-    sta font3+$100,y
-    sta font4+$100,y
     lda font1+$200,y
     sta font2+$200,y
     sta font3+$200,y
@@ -121,20 +135,106 @@ CopyLoop
     sta font4+$300,y
     iny
     bne CopyLoop
-    ; and shifting dino shape
     
     rts
 .endp
-
+;-----------------------------------------------
+.proc ClearWorld
+    ldy #63 ; world size
+    lda #0  ; ground
+@   sta WorldTable,y
+    dey
+    bpl @-
+    rts
+.endp
+.proc ClearScreen
+    ldy #64
+    lda #0
+ClearLoop
+    sta screen+$700,y
+    sta screen+$600,y
+    sta screen+$500,y
+    sta screen+$400,y
+    sta screen+$300,y
+    dey
+    bpl ClearLoop
+    rts
+.endp
+;-----------------------------------------------
+.proc WorldToScreen
+    jsr ClearScreen
+    ldx #0  ; start position
+    stx temp_b
+ToScreenLoop
+    lda WorldTable,x
+    bmi NothingToDraw
+    tay
+    jsr ShowObject
+NothingToDraw
+    inc temp_b
+    ldx temp_b
+    cpx #64
+    bne ToScreenLoop
+    rts
+.endp
+;-----------------------------------------------
+.proc WorldShift
+    ldy #0
+Shift
+    lda WorldTable+1,y
+    sta WorldTable,y
+    iny
+    cpy #63
+    bne Shift
+    lda #0  ;ground
+    sta WorldTable,y
+    ; now we can insert random object to world end
+    
+    rts
+.endp
+;-----------------------------------------------
+; Show Object on screen (test)
+; X - y position
+; Y - shape nr
+;-----------------------------------------------
+.proc ShowObject
+    lda ShapesTableL,y
+    sta temp_w
+    lda ShapesTableH,y
+    sta temp_w+1
+    ldy #0
+ObjectLoop
+    lda (temp_w),y
+    bmi @+
+    sta screen+$400,x
+@   adw temp_w #2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$500,x
+@   adw temp_w #2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$600,x
+@   adw temp_w #2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$700,x
+@   sbw temp_w #6
+    inx
+    iny
+    cpy #2  ; object width
+    bne ObjectLoop
+    rts
+.endp
 ;-----------------------------------------------
 ; Show Dino on screen (test)
 ; X - y position
 ; Y - shape nr
 ;-----------------------------------------------
 .proc ShowDino
-    lda ShapesTableL,y
+    lda DinoShapesTableL,y
     sta temp_w
-    lda ShapesTableH,y
+    lda DinoShapesTableH,y
     sta temp_w+1
     ldy #0
 DinoLoop
