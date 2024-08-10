@@ -1,5 +1,6 @@
 SCR_HEIGHT = 8
 WORLD_LENGTH = 64
+DIFF_LEVELS = 16
 
 ;  No internet
 ;---------------------------------------------------
@@ -212,6 +213,7 @@ Shift
     ;all zeroes
 insertObject
     mva #1 WorldTable+WORLD_LENGTH-2
+    inc diff_level
     
     
     
