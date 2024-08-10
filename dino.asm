@@ -1,3 +1,4 @@
+SCR_HEIGHT = 8
 
 ;  No internet
 ;---------------------------------------------------
@@ -34,37 +35,19 @@ font4 = font3+$400
     ins 'artwork/dino4.fnt'  ; 4 charset
     org font4+$400
 ; screen data
-; 8 lines 256bytes each
+; SCR_HEIGHT lines 256bytes each
 screen
-    org screen+($100*8)
+    .ds $100*SCR_HEIGHT
 ; display list
 GameDL
-    .byte $70,$70,$70,$70,$70   ; empty lines
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line1_addr
-        .word screen
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line2_addr
-        .word screen+$100
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line3_addr
-        .word screen+$200
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line4_addr
-        .word screen+$300
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line5_addr
-        .word screen+$400
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line6_addr
-        .word screen+$500
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line7_addr
-        .word screen+$600
-    .byte $02+$40+$10   ; gr.0+LMS+HSCRL
-line8_addr
-    .word screen+$700
-    .byte $41   ;JVB   
+    :5 .byte SKIP8   ; empty lines
+
+    .rept SCR_HEIGHT, #
+      .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
+line:1_addr
+        .word screen+$100*#
+    .endr
+    .byte JVB   
     .word GameDL
 
 ;---------------------------------------------------
