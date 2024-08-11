@@ -93,6 +93,26 @@ cactus_2
     .by $50, $51    ; '##'
     .by $4e, $4f    ; '##'
     .by $4c, $4d    ; '##'
+cactus_3
+    .by $ff, $ff    ; '..'
+    .by $57, $ff    ; '#.'
+    .by $56, $ff    ; '#.'
+    .by $55, $52    ; '##'
+cactus_4
+    .by $ff, $ff    ; '..'
+    .by $ff, $ff    ; '..'
+    .by $59, $ff    ; '#.'
+    .by $58, $52    ; '##'
+ground_1
+    .by $ff, $ff    ; '..'
+    .by $ff, $ff    ; '..'
+    .by $ff, $ff    ; '..'
+    .by $53, $54    ; '##'
+ground_2
+    .by $ff, $ff    ; '..'
+    .by $ff, $ff    ; '..'
+    .by $ff, $ff    ; '..'
+    .by $5a, $52    ; '##'
 
 ShapesTableL
     .by <ground_0
@@ -106,6 +126,10 @@ ShapesTableL
     .by <cactus_0
     .by <cactus_1
     .by <cactus_2
+    .by <cactus_3
+    .by <cactus_4
+    .by <ground_1
+    .by <ground_2
 ShapesTableH
     .by >ground_0
     .by >ground_0
@@ -118,10 +142,14 @@ ShapesTableH
     .by >cactus_0
     .by >cactus_1
     .by >cactus_2
+    .by >cactus_3
+    .by >cactus_4
+    .by >ground_1
+    .by >ground_2
 diff_object_gap ; min distance between obstacles by difficulty level
     :DIFF_LEVELS .by 20-#
 ;----------vars----------
 diff_level  .ds 1
-DinoJumpTr  .by 1,2,3,3,3,2,1
-JumpLen = 7
+DinoJumpTr  .by 1,2,3,4,4,3,2,1
+JumpLen = 8
 .endif  ; .IF *>0

@@ -93,24 +93,24 @@ FirstSTART
 EndLoop
     jsr WorldShift
     jsr WorldToScreen
-    jsr CheckJoy
     jsr ShowDino
-    waitRTC                   ; or waitRTC ?
+    jsr CheckJoy
+    ;waitRTC                   ; or waitRTC ?
     ;key
     mva #>font2 chbas
     waitRTC                   ; or waitRTC ?
     mva #3 hscrol
-    waitRTC                   ; or waitRTC ?
+    ;waitRTC                   ; or waitRTC ?
     ;key
     mva #>font3 chbas
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
-    waitRTC                   ; or waitRTC ?
+    ;waitRTC                   ; or waitRTC ?
     ;key
     mva #>font4 chbas
     waitRTC                   ; or waitRTC ?
     mva #1 hscrol
-    waitRTC                   ; or waitRTC ?
+    ;waitRTC                   ; or waitRTC ?
     ;key
     jsr Animate
     mva #>font1 chbas
@@ -218,7 +218,7 @@ insertObject
     lda RANDOM
     and #%00000001  ; insert 50/50
     beq noInsert
-    randomize 8 10  ; cactuses
+    randomize 8 13  ; cactuses and hole
     sta WorldTable+WORLD_LENGTH-2
     ora #$80
     sta WorldTable+WORLD_LENGTH-1
@@ -345,6 +345,8 @@ Jump
     beq jPhase2
     cmp #3
     jeq jPhase3
+    cmp #4
+    jeq jPhase4
 jPhase1
     ldy #0
 DinoLoop1
@@ -417,6 +419,30 @@ DinoLoop3
     cpy #5  ; dino width
     bne DinoLoop3
     rts
+jPhase4
+    ldy #0
+DinoLoop4
+    lda (temp_w),y
+    bmi @+
+    sta screen,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$100,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$200,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   sbw temp_w #15
+    inx
+    iny
+    cpy #5  ; dino width
+    bne DinoLoop4
+    rts
 .endp
 ;-----------------------------------------------
 .proc CheckJoy
@@ -451,6 +477,18 @@ Down
     sta DinoWalkPhase
     lda #0
     sta DinoState
+    sta COLOR1
+    ldy #0
+FadeColor
+    sty COLOR2
+    sty COLOR4
+    waitRTC
+    iny
+    cpy #$10
+    bne FadeColor
+    lda #$0f
+    sta COLOR2
+    sta COLOR4
     rts
 .endp
 ;-----------------------------------------------
