@@ -91,7 +91,6 @@ FirstSTART
     jsr ShowDino
     mva #$50 screen+$700+32
 EndLoop
-    jsr WorldShift
     ;lda #$32
     ;sta COLBAK
     jsr WorldToScreen
@@ -109,6 +108,7 @@ EndLoop
     mva #>font3 chbas
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
+    jsr WorldShift  ; better place (flickering)
     ;waitRTC                   ; or waitRTC ?
     ;key
     mva #>font4 chbas

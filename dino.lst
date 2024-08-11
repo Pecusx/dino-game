@@ -1043,34 +1043,34 @@ Source: dino.asm
     91 38A7 20 48 3A		    jsr ShowDino
     92 38AA A9 50 8D 20 37	    mva #$50 screen+$700+32
     93 38AF			EndLoop
-    94 38AF 20 78 39		    jsr WorldShift
-    95 				    ;lda #$32
-    96 				    ;sta COLBAK
-    97 38B2 20 5F 39		    jsr WorldToScreen
-    98 38B5 20 48 3A		    jsr ShowDino
-    99 				    ;lda #$5f
-   100 				    ;sta COLBAK
-   101 38B8 20 0D 3C		    jsr CheckJoy
-   102 				    ;waitRTC                   ; or waitRTC ?
-   103 				    ;key
-   104 38BB A9 24 8D F4 02	    mva #>font2 chbas
-   105 38C0			    waitRTC                   ; or waitRTC ?
+    94 				    ;lda #$32
+    95 				    ;sta COLBAK
+    96 38AF 20 5F 39		    jsr WorldToScreen
+    97 38B2 20 48 3A		    jsr ShowDino
+    98 				    ;lda #$5f
+    99 				    ;sta COLBAK
+   100 38B5 20 0D 3C		    jsr CheckJoy
+   101 				    ;waitRTC                   ; or waitRTC ?
+   102 				    ;key
+   103 38B8 A9 24 8D F4 02	    mva #>font2 chbas
+   104 38BD			    waitRTC                   ; or waitRTC ?
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 38C0 A5 14			lda RTCLOK+2
-     2 38C2 C5 14		?wa	cmp RTCLOK+2
-     3 38C4 F0 FC			beq ?wa
+     1 38BD A5 14			lda RTCLOK+2
+     2 38BF C5 14		?wa	cmp RTCLOK+2
+     3 38C1 F0 FC			beq ?wa
 Source: dino.asm
-   106 38C6 A9 03 8D 04 D4	    mva #3 hscrol
-   107 				    ;waitRTC                   ; or waitRTC ?
-   108 				    ;key
-   109 38CB A9 28 8D F4 02	    mva #>font3 chbas
-   110 38D0			    waitRTC                   ; or waitRTC ?
+   105 38C3 A9 03 8D 04 D4	    mva #3 hscrol
+   106 				    ;waitRTC                   ; or waitRTC ?
+   107 				    ;key
+   108 38C8 A9 28 8D F4 02	    mva #>font3 chbas
+   109 38CD			    waitRTC                   ; or waitRTC ?
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 38D0 A5 14			lda RTCLOK+2
-     2 38D2 C5 14		?wa	cmp RTCLOK+2
-     3 38D4 F0 FC			beq ?wa
+     1 38CD A5 14			lda RTCLOK+2
+     2 38CF C5 14		?wa	cmp RTCLOK+2
+     3 38D1 F0 FC			beq ?wa
 Source: dino.asm
-   111 38D6 A9 02 8D 04 D4	    mva #2 hscrol
+   110 38D3 A9 02 8D 04 D4	    mva #2 hscrol
+   111 38D8 20 78 39		    jsr WorldShift  ; better place (flickering)
    112 				    ;waitRTC                   ; or waitRTC ?
    113 				    ;key
    114 38DB A9 2C 8D F4 02	    mva #>font4 chbas
