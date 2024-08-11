@@ -10,6 +10,8 @@ DIFF_LEVELS = 16
 ; Zpage variables
     .zpvar temp_w   .word = $80
     .zpvar temp_b   .byte
+    .zpvar DinoWalkPhase    .byte
+    .zpvar DinoState    .byte   ; 0/1 - walk, 2/3 - crouch, 4... - jump 
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
@@ -43,7 +45,7 @@ screen
     .ds $100*SCR_HEIGHT
 ; display list
 GameDL
-    :5 .byte SKIP8   ; empty lines
+    :10 .byte SKIP8   ; empty lines
 
     .rept SCR_HEIGHT, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
@@ -59,7 +61,8 @@ WorldTable
 ;---------------------------------------------------
 FirstSTART
     jsr GenerateCharsets
-    jsr ClearWorld
+    jsr SetStart
+    jsr SetGameScreen
     mva #0 diff_level
     
     ; test only (some object in the world)
@@ -70,7 +73,6 @@ FirstSTART
     lda #4+$80  ; cactus (second char)
     sta WorldTable+21
     ;
-    jsr SetGameScreen
     ldx #5 ; position
     ldy #0  ; shape
     jsr ShowDino
@@ -91,25 +93,28 @@ EndLoop
     jsr WorldShift
     jsr WorldToScreen
     ldx #5 ; position
-    ldy #0  ; shape
+    lda DinoState
+    ora DinoWalkPhase  ; shape
+    tay
     jsr ShowDino
-    wait                   ; or waitRTC ?
-    key
+    waitRTC                   ; or waitRTC ?
+    ;key
     mva #>font2 chbas
     waitRTC                   ; or waitRTC ?
     mva #3 hscrol
-    wait                   ; or waitRTC ?
-    key
+    waitRTC                   ; or waitRTC ?
+    ;key
     mva #>font3 chbas
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
-    wait                   ; or waitRTC ?
-    key
+    waitRTC                   ; or waitRTC ?
+    ;key
     mva #>font4 chbas
     waitRTC                   ; or waitRTC ?
     mva #1 hscrol
-    wait                   ; or waitRTC ?
-    key
+    waitRTC                   ; or waitRTC ?
+    ;key
+    jsr AnimateBirds
     mva #>font1 chbas
     waitRTC                   ; or waitRTC ?
     mva #4 hscrol
@@ -215,7 +220,8 @@ insertObject
     lda RANDOM
     and #%00000001  ; insert 50/50
     beq noInsert
-    mva #1 WorldTable+WORLD_LENGTH-2
+    mva #6 WorldTable+WORLD_LENGTH-2
+    mva #6+$80 WorldTable+WORLD_LENGTH-1
     inc diff_level
     
     
@@ -224,7 +230,28 @@ noInsert
     rts
 .endp
 ;-----------------------------------------------
-; Show Object on screen (test)
+.proc AnimateBirds
+    ldy #WORLD_LENGTH
+@   lda WorldTable,y
+    tax
+    and #%01111111
+    beq NoBird
+    cmp #8 ; first cactus
+    bcs NoBird
+    ; then animate bird
+    txa
+    eor #%0000001
+    sta WorldTable,y
+NoBird
+    dey
+    bpl @-
+    lda DinoWalkPhase
+    eor #%00000001
+    sta DinoWalkPhase
+    rts
+.endp
+;-----------------------------------------------
+; Show Object on screen
 ; X - y position
 ; Y - shape nr
 ;-----------------------------------------------
@@ -292,8 +319,14 @@ DinoLoop
     rts
 .endp
 ;-----------------------------------------------
-; Generation of character sets 2,3 and 4 of 1
-; By copying and horizontal shift dino
+.proc SetStart
+    jsr ClearWorld
+    lda #0
+    sta DinoWalkPhase
+    lda #0
+    sta DinoState
+    rts
+.endp
 ;-----------------------------------------------
 .proc SetGameScreen
     mwa #GameDL dlptrs
