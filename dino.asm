@@ -46,7 +46,7 @@ screen
     .ds $100*SCR_HEIGHT
 ; display list
 GameDL
-    :10 .byte SKIP8   ; empty lines
+    :15 .byte SKIP8   ; empty lines
 
     .rept SCR_HEIGHT, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
@@ -92,8 +92,12 @@ FirstSTART
     mva #$50 screen+$700+32
 EndLoop
     jsr WorldShift
+    ;lda #$32
+    ;sta COLBAK
     jsr WorldToScreen
     jsr ShowDino
+    ;lda #$5f
+    ;sta COLBAK
     jsr CheckJoy
     ;waitRTC                   ; or waitRTC ?
     ;key

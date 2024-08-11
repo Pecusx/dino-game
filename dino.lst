@@ -972,7 +972,7 @@ Source: dino.asm
     46 = 3000			    .ds $100*SCR_HEIGHT
     47 				; display list
     48 3800			GameDL
-    49 3800-3D75> 70 70 70 70 +     :10 .byte SKIP8   ; empty lines
+    49 3800-3D7A> 70 70 70 70 +     :15 .byte SKIP8   ; empty lines
     50
     51 				    .rept SCR_HEIGHT, #
     52 				      .BYTE MODE2+LMS+SCH   
@@ -980,674 +980,678 @@ Source: dino.asm
     54 				        .WORD SCREEN+$100*#
     55 				    .endr
 Source: REPT
-    52 380A 52			      .BYTE MODE2+LMS+SCH   
-    52 380B			LINE0_ADDR
-    52 380B 00 30		        .WORD SCREEN+$100*#
-    52 380D 52			      .BYTE MODE2+LMS+SCH   
-    52 380E			LINE1_ADDR
-    52 380E 00 31		        .WORD SCREEN+$100*#
-    52 3810 52			      .BYTE MODE2+LMS+SCH   
-    52 3811			LINE2_ADDR
-    52 3811 00 32		        .WORD SCREEN+$100*#
-    52 3813 52			      .BYTE MODE2+LMS+SCH   
-    52 3814			LINE3_ADDR
-    52 3814 00 33		        .WORD SCREEN+$100*#
-    52 3816 52			      .BYTE MODE2+LMS+SCH   
-    52 3817			LINE4_ADDR
-    52 3817 00 34		        .WORD SCREEN+$100*#
-    52 3819 52			      .BYTE MODE2+LMS+SCH   
-    52 381A			LINE5_ADDR
-    52 381A 00 35		        .WORD SCREEN+$100*#
-    52 381C 52			      .BYTE MODE2+LMS+SCH   
-    52 381D			LINE6_ADDR
-    52 381D 00 36		        .WORD SCREEN+$100*#
-    52 381F 52			      .BYTE MODE2+LMS+SCH   
-    52 3820			LINE7_ADDR
-    52 3820 00 37		        .WORD SCREEN+$100*#
+    52 380F 52			      .BYTE MODE2+LMS+SCH   
+    52 3810			LINE0_ADDR
+    52 3810 00 30		        .WORD SCREEN+$100*#
+    52 3812 52			      .BYTE MODE2+LMS+SCH   
+    52 3813			LINE1_ADDR
+    52 3813 00 31		        .WORD SCREEN+$100*#
+    52 3815 52			      .BYTE MODE2+LMS+SCH   
+    52 3816			LINE2_ADDR
+    52 3816 00 32		        .WORD SCREEN+$100*#
+    52 3818 52			      .BYTE MODE2+LMS+SCH   
+    52 3819			LINE3_ADDR
+    52 3819 00 33		        .WORD SCREEN+$100*#
+    52 381B 52			      .BYTE MODE2+LMS+SCH   
+    52 381C			LINE4_ADDR
+    52 381C 00 34		        .WORD SCREEN+$100*#
+    52 381E 52			      .BYTE MODE2+LMS+SCH   
+    52 381F			LINE5_ADDR
+    52 381F 00 35		        .WORD SCREEN+$100*#
+    52 3821 52			      .BYTE MODE2+LMS+SCH   
+    52 3822			LINE6_ADDR
+    52 3822 00 36		        .WORD SCREEN+$100*#
+    52 3824 52			      .BYTE MODE2+LMS+SCH   
+    52 3825			LINE7_ADDR
+    52 3825 00 37		        .WORD SCREEN+$100*#
 Source: dino.asm
-    56 3822 41			    .byte JVB   
-    57 3823 00 38		    .word GameDL
+    56 3827 41			    .byte JVB   
+    57 3828 00 38		    .word GameDL
     58 				;---------------------------------------------------
     59 				; World table without dino
-    60 3825			WorldTable
-    61 3825 00 00 00 00 00 00 +     :WORLD_LENGTH .byte 0 ; ground
+    60 382A			WorldTable
+    61 382A 00 00 00 00 00 00 +     :WORLD_LENGTH .byte 0 ; ground
     62 				;---------------------------------------------------
-    63 3865			FirstSTART
-    64 3865 20 08 39		    jsr GenerateCharsets
-    65 3868 20 29 3C		    jsr SetStart
-    66 386B 20 53 3C		    jsr SetGameScreen
-    67 386E A9 00 8D 76 3D	    mva #0 diff_level
+    63 386A			FirstSTART
+    64 386A 20 0D 39		    jsr GenerateCharsets
+    65 386D 20 2E 3C		    jsr SetStart
+    66 3870 20 58 3C		    jsr SetGameScreen
+    67 3873 A9 00 8D 7B 3D	    mva #0 diff_level
     68 				    
     69 				    ; test only (some object in the world)
-    70 3873 A9 01		    lda #1  ;bird0
-    71 3875 8D 2F 38		    sta WorldTable+10
-    72 3878 A9 04		    lda #4  ;cactus
-    73 387A 8D 39 38		    sta WorldTable+20
-    74 387D A9 84		    lda #4+$80  ; cactus (second char)
-    75 387F 8D 3A 38		    sta WorldTable+21
+    70 3878 A9 01		    lda #1  ;bird0
+    71 387A 8D 34 38		    sta WorldTable+10
+    72 387D A9 04		    lda #4  ;cactus
+    73 387F 8D 3E 38		    sta WorldTable+20
+    74 3882 A9 84		    lda #4+$80  ; cactus (second char)
+    75 3884 8D 3F 38		    sta WorldTable+21
     76 				    ;
-    77 3882 A2 05		    ldx #5 ; position
-    78 3884 A0 00		    ldy #0  ; shape
-    79 3886 20 3D 3A		    jsr ShowDino
-    80 3889 A2 0A		    ldx #10 ; position
-    81 388B A0 01		    ldy #1  ; shape
-    82 388D 20 3D 3A		    jsr ShowDino
-    83 3890 A2 0F		    ldx #15 ; position
-    84 3892 A0 02		    ldy #2  ; shape
-    85 3894 20 3D 3A		    jsr ShowDino
-    86 3897 A2 14		    ldx #20 ; position
-    87 3899 A0 03		    ldy #3  ; shape
-    88 389B 20 3D 3A		    jsr ShowDino
-    89 389E A2 19		    ldx #25 ; position
-    90 38A0 A0 04		    ldy #4  ; shape
-    91 38A2 20 3D 3A		    jsr ShowDino
-    92 38A5 A9 50 8D 20 37	    mva #$50 screen+$700+32
-    93 38AA			EndLoop
-    94 38AA 20 6D 39		    jsr WorldShift
-    95 38AD 20 54 39		    jsr WorldToScreen
-    96 38B0 20 3D 3A		    jsr ShowDino
-    97 38B3 20 02 3C		    jsr CheckJoy
-    98 				    ;waitRTC                   ; or waitRTC ?
-    99 				    ;key
-   100 38B6 A9 24 8D F4 02	    mva #>font2 chbas
-   101 38BB			    waitRTC                   ; or waitRTC ?
+    77 3887 A2 05		    ldx #5 ; position
+    78 3889 A0 00		    ldy #0  ; shape
+    79 388B 20 42 3A		    jsr ShowDino
+    80 388E A2 0A		    ldx #10 ; position
+    81 3890 A0 01		    ldy #1  ; shape
+    82 3892 20 42 3A		    jsr ShowDino
+    83 3895 A2 0F		    ldx #15 ; position
+    84 3897 A0 02		    ldy #2  ; shape
+    85 3899 20 42 3A		    jsr ShowDino
+    86 389C A2 14		    ldx #20 ; position
+    87 389E A0 03		    ldy #3  ; shape
+    88 38A0 20 42 3A		    jsr ShowDino
+    89 38A3 A2 19		    ldx #25 ; position
+    90 38A5 A0 04		    ldy #4  ; shape
+    91 38A7 20 42 3A		    jsr ShowDino
+    92 38AA A9 50 8D 20 37	    mva #$50 screen+$700+32
+    93 38AF			EndLoop
+    94 38AF 20 72 39		    jsr WorldShift
+    95 				    ;lda #$32
+    96 				    ;sta COLBAK
+    97 38B2 20 59 39		    jsr WorldToScreen
+    98 38B5 20 42 3A		    jsr ShowDino
+    99 				    ;lda #$5f
+   100 				    ;sta COLBAK
+   101 38B8 20 07 3C		    jsr CheckJoy
+   102 				    ;waitRTC                   ; or waitRTC ?
+   103 				    ;key
+   104 38BB A9 24 8D F4 02	    mva #>font2 chbas
+   105 38C0			    waitRTC                   ; or waitRTC ?
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 38BB A5 14			lda RTCLOK+2
-     2 38BD C5 14		?wa	cmp RTCLOK+2
-     3 38BF F0 FC			beq ?wa
+     1 38C0 A5 14			lda RTCLOK+2
+     2 38C2 C5 14		?wa	cmp RTCLOK+2
+     3 38C4 F0 FC			beq ?wa
 Source: dino.asm
-   102 38C1 A9 03 8D 04 D4	    mva #3 hscrol
-   103 				    ;waitRTC                   ; or waitRTC ?
-   104 				    ;key
-   105 38C6 A9 28 8D F4 02	    mva #>font3 chbas
-   106 38CB			    waitRTC                   ; or waitRTC ?
+   106 38C6 A9 03 8D 04 D4	    mva #3 hscrol
+   107 				    ;waitRTC                   ; or waitRTC ?
+   108 				    ;key
+   109 38CB A9 28 8D F4 02	    mva #>font3 chbas
+   110 38D0			    waitRTC                   ; or waitRTC ?
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 38CB A5 14			lda RTCLOK+2
-     2 38CD C5 14		?wa	cmp RTCLOK+2
-     3 38CF F0 FC			beq ?wa
+     1 38D0 A5 14			lda RTCLOK+2
+     2 38D2 C5 14		?wa	cmp RTCLOK+2
+     3 38D4 F0 FC			beq ?wa
 Source: dino.asm
-   107 38D1 A9 02 8D 04 D4	    mva #2 hscrol
-   108 				    ;waitRTC                   ; or waitRTC ?
-   109 				    ;key
-   110 38D6 A9 2C 8D F4 02	    mva #>font4 chbas
-   111 38DB			    waitRTC                   ; or waitRTC ?
+   111 38D6 A9 02 8D 04 D4	    mva #2 hscrol
+   112 				    ;waitRTC                   ; or waitRTC ?
+   113 				    ;key
+   114 38DB A9 2C 8D F4 02	    mva #>font4 chbas
+   115 38E0			    waitRTC                   ; or waitRTC ?
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 38DB A5 14			lda RTCLOK+2
-     2 38DD C5 14		?wa	cmp RTCLOK+2
-     3 38DF F0 FC			beq ?wa
+     1 38E0 A5 14			lda RTCLOK+2
+     2 38E2 C5 14		?wa	cmp RTCLOK+2
+     3 38E4 F0 FC			beq ?wa
 Source: dino.asm
-   112 38E1 A9 01 8D 04 D4	    mva #1 hscrol
-   113 				    ;waitRTC                   ; or waitRTC ?
-   114 				    ;key
-   115 38E6 20 AF 39		    jsr Animate
-   116 38E9 A9 20 8D F4 02	    mva #>font1 chbas
-   117 38EE			    waitRTC                   ; or waitRTC ?
+   116 38E6 A9 01 8D 04 D4	    mva #1 hscrol
+   117 				    ;waitRTC                   ; or waitRTC ?
+   118 				    ;key
+   119 38EB 20 B4 39		    jsr Animate
+   120 38EE A9 20 8D F4 02	    mva #>font1 chbas
+   121 38F3			    waitRTC                   ; or waitRTC ?
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 38EE A5 14			lda RTCLOK+2
-     2 38F0 C5 14		?wa	cmp RTCLOK+2
-     3 38F2 F0 FC			beq ?wa
+     1 38F3 A5 14			lda RTCLOK+2
+     2 38F5 C5 14		?wa	cmp RTCLOK+2
+     3 38F7 F0 FC			beq ?wa
 Source: dino.asm
-   118 38F4 A9 04 8D 04 D4	    mva #4 hscrol
-   119 38F9 4C AA 38		    jmp EndLoop
-   120 38FC			    halt
+   122 38F9 A9 04 8D 04 D4	    mva #4 hscrol
+   123 38FE 4C AF 38		    jmp EndLoop
+   124 3901			    halt
 Macro: HALT [Source: MACRO.ASM]
-     1 38FC			?stop  
-     2 38FC AD 0A D2		      lda RANDOM 
-     3 38FF 29 05		      and #$05
-     4 3901 8D 1A D0		      sta COLBAK
-     5 3904 4C FC 38		      jmp ?stop
+     1 3901			?stop  
+     2 3901 AD 0A D2		      lda RANDOM 
+     3 3904 29 05		      and #$05
+     4 3906 8D 1A D0		      sta COLBAK
+     5 3909 4C 01 39		      jmp ?stop
 Source: dino.asm
-   121 3907 60			    rts
-   122
-   123 				;-----------------------------------------------
-   124 				; Generation of character sets 2,3 and 4 of 1
-   125 				; By copying and horizontal shift dino
-   126 				;-----------------------------------------------
-   127 3908			.proc GenerateCharsets
-   128 				    ; copy charset 1 to 2,3 and 4 (but not dino chars)
-   129 3908 A0 00		    ldy #0
-   130 390A			CopyLoop
-   131 390A B9 00 20		    lda font1,y
-   132 390D 99 00 24		    sta font2,y
-   133 3910 99 00 28		    sta font3,y
-   134 3913 99 00 2C		    sta font4,y
-   135 3916 B9 00 22		    lda font1+$200,y
-   136 3919 99 00 26		    sta font2+$200,y
-   137 391C 99 00 2A		    sta font3+$200,y
-   138 391F 99 00 2E		    sta font4+$200,y
-   139 3922 B9 00 23		    lda font1+$300,y
-   140 3925 99 00 27		    sta font2+$300,y
-   141 3928 99 00 2B		    sta font3+$300,y
-   142 392B 99 00 2F		    sta font4+$300,y
-   143 392E C8			    iny
-   144 392F D0 D9		    bne CopyLoop
-   145 				    
-   146 3931 60			    rts
-   147 				.endp
-   148 				;-----------------------------------------------
-   149 3932			.proc ClearWorld
-   150 3932 A0 3F		    ldy #WORLD_LENGTH-1 ; world size
-   151 3934 A9 00		    lda #0  ; ground
-   152 3936 99 25 38		@   sta WorldTable,y
-   153 3939 88			    dey
-   154 393A 10 FA		    bpl @-
-   155 393C 60			    rts
-   156 				.endp
-   157 393D			.proc ClearScreen
-   158 393D A0 40		    ldy #WORLD_LENGTH ; TODO: shouldn't be -1?
-   159 393F A9 00		    lda #0
-   160 3941			ClearLoop
-   161 3941 99 00 37		    sta screen+$700,y
-   162 3944 99 00 36		    sta screen+$600,y
-   163 3947 99 00 35		    sta screen+$500,y
-   164 394A 99 00 34		    sta screen+$400,y
-   165 394D 99 00 33		    sta screen+$300,y
-   166 3950 88			    dey
-   167 3951 10 EE		    bpl ClearLoop
-   168 3953 60			    rts
-   169 				.endp
-   170 				;-----------------------------------------------
-   171 3954			.proc WorldToScreen
-   172 3954 20 3D 39		    jsr ClearScreen
-   173 3957 A2 00		    ldx #0  ; start position
-   174 3959 86 82		    stx temp_b
-   175 395B			ToScreenLoop
-   176 395B BD 25 38		    lda WorldTable,x
-   177 395E 30 04		    bmi NothingToDraw
-   178 3960 A8			    tay
-   179 3961 20 E2 39		    jsr ShowObject
-   180 3964			NothingToDraw
-   181 3964 E6 82		    inc temp_b
-   182 3966 A6 82		    ldx temp_b
-   183 3968 E0 40		    cpx #WORLD_LENGTH
-   184 396A D0 EF		    bne ToScreenLoop
-   185 396C 60			    rts
-   186 				.endp
-   187 				;-----------------------------------------------
-   188 396D			.proc WorldShift
-   189 396D A0 00		    ldy #0
-   190 396F			Shift
-   191 396F B9 26 38		    lda WorldTable+1,y
-   192 3972 99 25 38		    sta WorldTable,y
-   193 3975 C8			    iny
-   194 3976 C0 3F		    cpy #WORLD_LENGTH-1
-   195 3978 D0 F5		    bne Shift
-   196 397A A9 00		    lda #0  ;ground
-   197 397C 99 25 38		    sta WorldTable,y
-   198 				    ; now we can insert random object to world end
-   199 				    
-   200 				    ; check if there is enough of the gap between obstacles
-   201 				    
-   202 				    ; get the gap for the given difficulty level
-   203 397F AE 76 3D		    ldx diff_level
-   204 3982 A9 40		    lda #WORLD_LENGTH
-   205 3984 38			    sec
-   206 3985 FD 66 3D		    sbc diff_object_gap,x
-   207 3988 AA			    tax 
-   208
-   209 				    ; is there a gap?
-   210 				@
-   211 3989 BD 25 38		    lda WorldTable,x
-   212 398C D0 20		    bne noInsert
-   213 398E E8			    inx
-   214 398F E0 40		    cpx #WORLD_LENGTH
-   215 3991 D0 F6		    bne @-
-   216 				    ;all zeroes
-   217 3993			insertObject
-   218 3993 AD 0A D2		    lda RANDOM
-   219 3996 29 01		    and #%00000001  ; insert 50/50
-   220 3998 F0 14		    beq noInsert
-   221 399A			    randomize 8 13  ; cactuses and hole
+   125 390C 60			    rts
+   126
+   127 				;-----------------------------------------------
+   128 				; Generation of character sets 2,3 and 4 of 1
+   129 				; By copying and horizontal shift dino
+   130 				;-----------------------------------------------
+   131 390D			.proc GenerateCharsets
+   132 				    ; copy charset 1 to 2,3 and 4 (but not dino chars)
+   133 390D A0 00		    ldy #0
+   134 390F			CopyLoop
+   135 390F B9 00 20		    lda font1,y
+   136 3912 99 00 24		    sta font2,y
+   137 3915 99 00 28		    sta font3,y
+   138 3918 99 00 2C		    sta font4,y
+   139 391B B9 00 22		    lda font1+$200,y
+   140 391E 99 00 26		    sta font2+$200,y
+   141 3921 99 00 2A		    sta font3+$200,y
+   142 3924 99 00 2E		    sta font4+$200,y
+   143 3927 B9 00 23		    lda font1+$300,y
+   144 392A 99 00 27		    sta font2+$300,y
+   145 392D 99 00 2B		    sta font3+$300,y
+   146 3930 99 00 2F		    sta font4+$300,y
+   147 3933 C8			    iny
+   148 3934 D0 D9		    bne CopyLoop
+   149 				    
+   150 3936 60			    rts
+   151 				.endp
+   152 				;-----------------------------------------------
+   153 3937			.proc ClearWorld
+   154 3937 A0 3F		    ldy #WORLD_LENGTH-1 ; world size
+   155 3939 A9 00		    lda #0  ; ground
+   156 393B 99 2A 38		@   sta WorldTable,y
+   157 393E 88			    dey
+   158 393F 10 FA		    bpl @-
+   159 3941 60			    rts
+   160 				.endp
+   161 3942			.proc ClearScreen
+   162 3942 A0 40		    ldy #WORLD_LENGTH ; TODO: shouldn't be -1?
+   163 3944 A9 00		    lda #0
+   164 3946			ClearLoop
+   165 3946 99 00 37		    sta screen+$700,y
+   166 3949 99 00 36		    sta screen+$600,y
+   167 394C 99 00 35		    sta screen+$500,y
+   168 394F 99 00 34		    sta screen+$400,y
+   169 3952 99 00 33		    sta screen+$300,y
+   170 3955 88			    dey
+   171 3956 10 EE		    bpl ClearLoop
+   172 3958 60			    rts
+   173 				.endp
+   174 				;-----------------------------------------------
+   175 3959			.proc WorldToScreen
+   176 3959 20 42 39		    jsr ClearScreen
+   177 395C A2 00		    ldx #0  ; start position
+   178 395E 86 82		    stx temp_b
+   179 3960			ToScreenLoop
+   180 3960 BD 2A 38		    lda WorldTable,x
+   181 3963 30 04		    bmi NothingToDraw
+   182 3965 A8			    tay
+   183 3966 20 E7 39		    jsr ShowObject
+   184 3969			NothingToDraw
+   185 3969 E6 82		    inc temp_b
+   186 396B A6 82		    ldx temp_b
+   187 396D E0 40		    cpx #WORLD_LENGTH
+   188 396F D0 EF		    bne ToScreenLoop
+   189 3971 60			    rts
+   190 				.endp
+   191 				;-----------------------------------------------
+   192 3972			.proc WorldShift
+   193 3972 A0 00		    ldy #0
+   194 3974			Shift
+   195 3974 B9 2B 38		    lda WorldTable+1,y
+   196 3977 99 2A 38		    sta WorldTable,y
+   197 397A C8			    iny
+   198 397B C0 3F		    cpy #WORLD_LENGTH-1
+   199 397D D0 F5		    bne Shift
+   200 397F A9 00		    lda #0  ;ground
+   201 3981 99 2A 38		    sta WorldTable,y
+   202 				    ; now we can insert random object to world end
+   203 				    
+   204 				    ; check if there is enough of the gap between obstacles
+   205 				    
+   206 				    ; get the gap for the given difficulty level
+   207 3984 AE 7B 3D		    ldx diff_level
+   208 3987 A9 40		    lda #WORLD_LENGTH
+   209 3989 38			    sec
+   210 398A FD 6B 3D		    sbc diff_object_gap,x
+   211 398D AA			    tax 
+   212
+   213 				    ; is there a gap?
+   214 				@
+   215 398E BD 2A 38		    lda WorldTable,x
+   216 3991 D0 20		    bne noInsert
+   217 3993 E8			    inx
+   218 3994 E0 40		    cpx #WORLD_LENGTH
+   219 3996 D0 F6		    bne @-
+   220 				    ;all zeroes
+   221 3998			insertObject
+   222 3998 AD 0A D2		    lda RANDOM
+   223 399B 29 01		    and #%00000001  ; insert 50/50
+   224 399D F0 14		    beq noInsert
+   225 399F			    randomize 8 13  ; cactuses and hole
 Macro: RANDOMIZE [Source: MACRO.ASM]
-     6 399A			?rand
-     7 399A AD 0A D2		      lda random
-     8 399D C9 06		      cmp #13+1-8 ;ceiling
-     9 399F B0 F9		      bcs ?rand
-    11 39A1 69 08		      adc #8
+     6 399F			?rand
+     7 399F AD 0A D2		      lda random
+     8 39A2 C9 06		      cmp #13+1-8 ;ceiling
+     9 39A4 B0 F9		      bcs ?rand
+    11 39A6 69 08		      adc #8
 Source: dino.asm
-   222 39A3 8D 63 38		    sta WorldTable+WORLD_LENGTH-2
-   223 39A6 09 80		    ora #$80
-   224 39A8 8D 64 38		    sta WorldTable+WORLD_LENGTH-1
-   225 39AB EE 76 3D		    inc diff_level
-   226 				    
-   227 				    
-   228 				    
-   229 39AE			noInsert    
-   230 39AE 60			    rts
-   231 				.endp
-   232 				;-----------------------------------------------
-   233 39AF			.proc Animate
-   234 39AF A0 40		    ldy #WORLD_LENGTH
-   235 39B1 B9 25 38		@   lda WorldTable,y
-   236 39B4 AA			    tax
-   237 39B5 29 7F		    and #%01111111
-   238 39B7 F0 0A		    beq NoBird
-   239 39B9 C9 08		    cmp #8 ; first cactus
-   240 39BB B0 06		    bcs NoBird
-   241 				    ; then animate bird
-   242 39BD 8A			    txa
-   243 39BE 49 01		    eor #%0000001
-   244 39C0 99 25 38		    sta WorldTable,y
-   245 39C3			NoBird
-   246 39C3 88			    dey
-   247 39C4 10 EB		    bpl @-
-   248 				    ; animate Dino
-   249 39C6 A5 83		    lda DinoWalkPhase
-   250 39C8 49 01		    eor #%00000001
-   251 39CA 85 83		    sta DinoWalkPhase
-   252 				    ; jump
-   253 39CC A5 84		    lda DinoState
-   254 39CE C9 04		    cmp #4  ; jump state
-   255 39D0 D0 0F		    bne NoJump
-   256 39D2 A5 85		    lda JumpPhase
-   257 39D4 C9 08		    cmp #JumpLen  ; max jump phase
-   258 39D6 F0 03		    beq EndJump
-   259 39D8 E6 85		    inc JumpPhase
-   260 39DA 60			    rts
-   261 39DB			EndJump
-   262 39DB A9 00		    lda #0
-   263 39DD 85 85		    sta JumpPhase
-   264 39DF 85 84		    sta DinoState
-   265 39E1			NoJump
-   266 39E1 60			    rts
-   267 				.endp
-   268 				;-----------------------------------------------
-   269 				; Show Object on screen
-   270 				; X - y position
-   271 				; Y - shape nr
+   226 39A8 8D 68 38		    sta WorldTable+WORLD_LENGTH-2
+   227 39AB 09 80		    ora #$80
+   228 39AD 8D 69 38		    sta WorldTable+WORLD_LENGTH-1
+   229 39B0 EE 7B 3D		    inc diff_level
+   230 				    
+   231 				    
+   232 				    
+   233 39B3			noInsert    
+   234 39B3 60			    rts
+   235 				.endp
+   236 				;-----------------------------------------------
+   237 39B4			.proc Animate
+   238 39B4 A0 40		    ldy #WORLD_LENGTH
+   239 39B6 B9 2A 38		@   lda WorldTable,y
+   240 39B9 AA			    tax
+   241 39BA 29 7F		    and #%01111111
+   242 39BC F0 0A		    beq NoBird
+   243 39BE C9 08		    cmp #8 ; first cactus
+   244 39C0 B0 06		    bcs NoBird
+   245 				    ; then animate bird
+   246 39C2 8A			    txa
+   247 39C3 49 01		    eor #%0000001
+   248 39C5 99 2A 38		    sta WorldTable,y
+   249 39C8			NoBird
+   250 39C8 88			    dey
+   251 39C9 10 EB		    bpl @-
+   252 				    ; animate Dino
+   253 39CB A5 83		    lda DinoWalkPhase
+   254 39CD 49 01		    eor #%00000001
+   255 39CF 85 83		    sta DinoWalkPhase
+   256 				    ; jump
+   257 39D1 A5 84		    lda DinoState
+   258 39D3 C9 04		    cmp #4  ; jump state
+   259 39D5 D0 0F		    bne NoJump
+   260 39D7 A5 85		    lda JumpPhase
+   261 39D9 C9 08		    cmp #JumpLen  ; max jump phase
+   262 39DB F0 03		    beq EndJump
+   263 39DD E6 85		    inc JumpPhase
+   264 39DF 60			    rts
+   265 39E0			EndJump
+   266 39E0 A9 00		    lda #0
+   267 39E2 85 85		    sta JumpPhase
+   268 39E4 85 84		    sta DinoState
+   269 39E6			NoJump
+   270 39E6 60			    rts
+   271 				.endp
    272 				;-----------------------------------------------
-   273 39E2			.proc ShowObject
-   274 39E2 B9 48 3D		    lda ShapesTableL,y
-   275 39E5 85 80		    sta temp_w
-   276 39E7 B9 57 3D		    lda ShapesTableH,y
-   277 39EA 85 81		    sta temp_w+1
-   278 39EC A0 00		    ldy #0
-   279 39EE			ObjectLoop
-   280 39EE B1 80		    lda (temp_w),y
-   281 39F0 30 03		    bmi @+
-   282 39F2 9D 00 34		    sta screen+$400,x
-   283 39F5 18 A5 80 69 02 85 + @   adw temp_w #2
-   284 3A00 B1 80		    lda (temp_w),y
-   285 3A02 30 03		    bmi @+
-   286 3A04 9D 00 35		    sta screen+$500,x
-   287 3A07 18 A5 80 69 02 85 + @   adw temp_w #2
-   288 3A12 B1 80		    lda (temp_w),y
-   289 3A14 30 03		    bmi @+
-   290 3A16 9D 00 36		    sta screen+$600,x
-   291 3A19 18 A5 80 69 02 85 + @   adw temp_w #2
-   292 3A24 B1 80		    lda (temp_w),y
-   293 3A26 30 03		    bmi @+
-   294 3A28 9D 00 37		    sta screen+$700,x
-   295 3A2B 38 A5 80 E9 06 85 + @   sbw temp_w #6
-   296 3A36 E8			    inx
-   297 3A37 C8			    iny
-   298 3A38 C0 02		    cpy #2  ; object width
-   299 3A3A D0 B2		    bne ObjectLoop
-   300 3A3C 60			    rts
-   301 				.endp
-   302 				;-----------------------------------------------
-   303 				; Show Dino on screen (test)
-   304 				;-----------------------------------------------
-   305 3A3D			.proc ShowDino
-   306 3A3D A2 05		    ldx #5 ; position
-   307 3A3F A5 84		    lda DinoState
-   308 3A41 05 83		    ora DinoWalkPhase  ; shape
-   309 3A43 A8			    tay
-   310 3A44 B9 CC 3C		    lda DinoShapesTableL,y
-   311 3A47 85 80		    sta temp_w
-   312 3A49 B9 D2 3C		    lda DinoShapesTableH,y
-   313 3A4C 85 81		    sta temp_w+1
-   314 3A4E C0 04		    cpy #4  ; jump
-   315 3A50 F0 55		    beq Jump
-   316 3A52 C0 05		    cpy #5  ; jump
-   317 3A54 F0 51		    beq Jump
-   318 3A56 A0 00		    ldy #0
-   319 3A58			DinoLoop
-   320 3A58 B1 80		    lda (temp_w),y
-   321 3A5A 30 03		    bmi @+
-   322 3A5C 9D 00 34		    sta screen+$400,x
-   323 3A5F 18 A5 80 69 05 85 + @   adw temp_w #5
-   324 3A6A B1 80		    lda (temp_w),y
-   325 3A6C 30 03		    bmi @+
-   326 3A6E 9D 00 35		    sta screen+$500,x
-   327 3A71 18 A5 80 69 05 85 + @   adw temp_w #5
-   328 3A7C B1 80		    lda (temp_w),y
-   329 3A7E 30 03		    bmi @+
-   330 3A80 9D 00 36		    sta screen+$600,x
-   331 3A83 18 A5 80 69 05 85 + @   adw temp_w #5
-   332 3A8E B1 80		    lda (temp_w),y
-   333 3A90 30 03		    bmi @+
-   334 3A92 9D 00 37		    sta screen+$700,x
-   335 3A95 38 A5 80 E9 0F 85 + @   sbw temp_w #15
-   336 3AA0 E8			    inx
-   337 3AA1 C8			    iny
-   338 3AA2 C0 05		    cpy #5  ; dino width
-   339 3AA4 D0 B2		    bne DinoLoop
-   340 3AA6 60			    rts
-   341 3AA7			Jump
-   342 3AA7 A4 85		    ldy JumpPhase
-   343 3AA9 B9 77 3D		    lda DinoJumpTr,y
-   344 3AAC C9 02		    cmp #2
-   345 3AAE F0 5F		    beq jPhase2
-   346 3AB0 C9 03		    cmp #3
-   347 3AB2 D0 03 4C 60 3B	    jeq jPhase3
-   348 3AB7 C9 04		    cmp #4
-   349 3AB9 D0 03 4C B1 3B	    jeq jPhase4
-   350 3ABE			jPhase1
-   351 3ABE A0 00		    ldy #0
-   352 3AC0			DinoLoop1
-   353 3AC0 B1 80		    lda (temp_w),y
-   354 3AC2 30 03		    bmi @+
-   355 3AC4 9D 00 33		    sta screen+$300,x
-   356 3AC7 18 A5 80 69 05 85 + @   adw temp_w #5
-   357 3AD2 B1 80		    lda (temp_w),y
-   358 3AD4 30 03		    bmi @+
-   359 3AD6 9D 00 34		    sta screen+$400,x
-   360 3AD9 18 A5 80 69 05 85 + @   adw temp_w #5
-   361 3AE4 B1 80		    lda (temp_w),y
-   362 3AE6 30 03		    bmi @+
-   363 3AE8 9D 00 35		    sta screen+$500,x
-   364 3AEB 18 A5 80 69 05 85 + @   adw temp_w #5
-   365 3AF6 B1 80		    lda (temp_w),y
-   366 3AF8 30 03		    bmi @+
-   367 3AFA 9D 00 36		    sta screen+$600,x
-   368 3AFD 38 A5 80 E9 0F 85 + @   sbw temp_w #15
-   369 3B08 E8			    inx
-   370 3B09 C8			    iny
-   371 3B0A C0 05		    cpy #5  ; dino width
-   372 3B0C D0 B2		    bne DinoLoop1
-   373 3B0E 60			    rts
-   374 3B0F			jPhase2
-   375 3B0F A0 00		    ldy #0
-   376 3B11			DinoLoop2
-   377 3B11 B1 80		    lda (temp_w),y
-   378 3B13 30 03		    bmi @+
-   379 3B15 9D 00 32		    sta screen+$200,x
-   380 3B18 18 A5 80 69 05 85 + @   adw temp_w #5
-   381 3B23 B1 80		    lda (temp_w),y
-   382 3B25 30 03		    bmi @+
-   383 3B27 9D 00 33		    sta screen+$300,x
-   384 3B2A 18 A5 80 69 05 85 + @   adw temp_w #5
-   385 3B35 B1 80		    lda (temp_w),y
-   386 3B37 30 03		    bmi @+
-   387 3B39 9D 00 34		    sta screen+$400,x
-   388 3B3C 18 A5 80 69 05 85 + @   adw temp_w #5
-   389 3B47 B1 80		    lda (temp_w),y
-   390 3B49 30 03		    bmi @+
-   391 3B4B 9D 00 35		    sta screen+$500,x
-   392 3B4E 38 A5 80 E9 0F 85 + @   sbw temp_w #15
-   393 3B59 E8			    inx
-   394 3B5A C8			    iny
-   395 3B5B C0 05		    cpy #5  ; dino width
-   396 3B5D D0 B2		    bne DinoLoop2
-   397 3B5F 60			    rts
-   398 3B60			jPhase3
-   399 3B60 A0 00		    ldy #0
-   400 3B62			DinoLoop3
-   401 3B62 B1 80		    lda (temp_w),y
-   402 3B64 30 03		    bmi @+
-   403 3B66 9D 00 31		    sta screen+$100,x
-   404 3B69 18 A5 80 69 05 85 + @   adw temp_w #5
-   405 3B74 B1 80		    lda (temp_w),y
-   406 3B76 30 03		    bmi @+
-   407 3B78 9D 00 32		    sta screen+$200,x
-   408 3B7B 18 A5 80 69 05 85 + @   adw temp_w #5
-   409 3B86 B1 80		    lda (temp_w),y
-   410 3B88 30 03		    bmi @+
-   411 3B8A 9D 00 33		    sta screen+$300,x
-   412 3B8D 18 A5 80 69 05 85 + @   adw temp_w #5
-   413 3B98 B1 80		    lda (temp_w),y
-   414 3B9A 30 03		    bmi @+
-   415 3B9C 9D 00 34		    sta screen+$400,x
-   416 3B9F 38 A5 80 E9 0F 85 + @   sbw temp_w #15
-   417 3BAA E8			    inx
-   418 3BAB C8			    iny
-   419 3BAC C0 05		    cpy #5  ; dino width
-   420 3BAE D0 B2		    bne DinoLoop3
-   421 3BB0 60			    rts
-   422 3BB1			jPhase4
-   423 3BB1 A0 00		    ldy #0
-   424 3BB3			DinoLoop4
-   425 3BB3 B1 80		    lda (temp_w),y
-   426 3BB5 30 03		    bmi @+
-   427 3BB7 9D 00 30		    sta screen,x
-   428 3BBA 18 A5 80 69 05 85 + @   adw temp_w #5
-   429 3BC5 B1 80		    lda (temp_w),y
-   430 3BC7 30 03		    bmi @+
-   431 3BC9 9D 00 31		    sta screen+$100,x
-   432 3BCC 18 A5 80 69 05 85 + @   adw temp_w #5
-   433 3BD7 B1 80		    lda (temp_w),y
-   434 3BD9 30 03		    bmi @+
-   435 3BDB 9D 00 32		    sta screen+$200,x
-   436 3BDE 18 A5 80 69 05 85 + @   adw temp_w #5
-   437 3BE9 B1 80		    lda (temp_w),y
-   438 3BEB 30 03		    bmi @+
-   439 3BED 9D 00 33		    sta screen+$300,x
-   440 3BF0 38 A5 80 E9 0F 85 + @   sbw temp_w #15
-   441 3BFB E8			    inx
-   442 3BFC C8			    iny
-   443 3BFD C0 05		    cpy #5  ; dino width
-   444 3BFF D0 B2		    bne DinoLoop4
-   445 3C01 60			    rts
-   446 				.endp
-   447 				;-----------------------------------------------
-   448 3C02			.proc CheckJoy
-   449 3C02 A5 84		    lda DinoState
-   450 3C04 C9 04		    cmp #4  ; jump state
-   451 3C06 F0 12		    beq NoChange
-   452 3C08 AD 78 02		    lda STICK0
-   453 3C0B 29 02		    and #%00000010  ; down
-   454 3C0D F0 15		    beq Down
-   455 3C0F AD 78 02		    lda STICK0
-   456 3C12 29 01		    and #%00000001  ; up
-   457 3C14 F0 05		    beq Up
-   458 				    ; no change state (temporary set to 0)
-   459 3C16 A9 00		    lda #0
-   460 3C18 85 84		    sta DinoState
-   461 3C1A			NoChange
-   462 3C1A 60			    rts
-   463 3C1B A9 04		Up  lda #4
+   273 				; Show Object on screen
+   274 				; X - y position
+   275 				; Y - shape nr
+   276 				;-----------------------------------------------
+   277 39E7			.proc ShowObject
+   278 39E7 B9 4D 3D		    lda ShapesTableL,y
+   279 39EA 85 80		    sta temp_w
+   280 39EC B9 5C 3D		    lda ShapesTableH,y
+   281 39EF 85 81		    sta temp_w+1
+   282 39F1 A0 00		    ldy #0
+   283 39F3			ObjectLoop
+   284 39F3 B1 80		    lda (temp_w),y
+   285 39F5 30 03		    bmi @+
+   286 39F7 9D 00 34		    sta screen+$400,x
+   287 39FA 18 A5 80 69 02 85 + @   adw temp_w #2
+   288 3A05 B1 80		    lda (temp_w),y
+   289 3A07 30 03		    bmi @+
+   290 3A09 9D 00 35		    sta screen+$500,x
+   291 3A0C 18 A5 80 69 02 85 + @   adw temp_w #2
+   292 3A17 B1 80		    lda (temp_w),y
+   293 3A19 30 03		    bmi @+
+   294 3A1B 9D 00 36		    sta screen+$600,x
+   295 3A1E 18 A5 80 69 02 85 + @   adw temp_w #2
+   296 3A29 B1 80		    lda (temp_w),y
+   297 3A2B 30 03		    bmi @+
+   298 3A2D 9D 00 37		    sta screen+$700,x
+   299 3A30 38 A5 80 E9 06 85 + @   sbw temp_w #6
+   300 3A3B E8			    inx
+   301 3A3C C8			    iny
+   302 3A3D C0 02		    cpy #2  ; object width
+   303 3A3F D0 B2		    bne ObjectLoop
+   304 3A41 60			    rts
+   305 				.endp
+   306 				;-----------------------------------------------
+   307 				; Show Dino on screen (test)
+   308 				;-----------------------------------------------
+   309 3A42			.proc ShowDino
+   310 3A42 A2 05		    ldx #5 ; position
+   311 3A44 A5 84		    lda DinoState
+   312 3A46 05 83		    ora DinoWalkPhase  ; shape
+   313 3A48 A8			    tay
+   314 3A49 B9 D1 3C		    lda DinoShapesTableL,y
+   315 3A4C 85 80		    sta temp_w
+   316 3A4E B9 D7 3C		    lda DinoShapesTableH,y
+   317 3A51 85 81		    sta temp_w+1
+   318 3A53 C0 04		    cpy #4  ; jump
+   319 3A55 F0 55		    beq Jump
+   320 3A57 C0 05		    cpy #5  ; jump
+   321 3A59 F0 51		    beq Jump
+   322 3A5B A0 00		    ldy #0
+   323 3A5D			DinoLoop
+   324 3A5D B1 80		    lda (temp_w),y
+   325 3A5F 30 03		    bmi @+
+   326 3A61 9D 00 34		    sta screen+$400,x
+   327 3A64 18 A5 80 69 05 85 + @   adw temp_w #5
+   328 3A6F B1 80		    lda (temp_w),y
+   329 3A71 30 03		    bmi @+
+   330 3A73 9D 00 35		    sta screen+$500,x
+   331 3A76 18 A5 80 69 05 85 + @   adw temp_w #5
+   332 3A81 B1 80		    lda (temp_w),y
+   333 3A83 30 03		    bmi @+
+   334 3A85 9D 00 36		    sta screen+$600,x
+   335 3A88 18 A5 80 69 05 85 + @   adw temp_w #5
+   336 3A93 B1 80		    lda (temp_w),y
+   337 3A95 30 03		    bmi @+
+   338 3A97 9D 00 37		    sta screen+$700,x
+   339 3A9A 38 A5 80 E9 0F 85 + @   sbw temp_w #15
+   340 3AA5 E8			    inx
+   341 3AA6 C8			    iny
+   342 3AA7 C0 05		    cpy #5  ; dino width
+   343 3AA9 D0 B2		    bne DinoLoop
+   344 3AAB 60			    rts
+   345 3AAC			Jump
+   346 3AAC A4 85		    ldy JumpPhase
+   347 3AAE B9 7C 3D		    lda DinoJumpTr,y
+   348 3AB1 C9 02		    cmp #2
+   349 3AB3 F0 5F		    beq jPhase2
+   350 3AB5 C9 03		    cmp #3
+   351 3AB7 D0 03 4C 65 3B	    jeq jPhase3
+   352 3ABC C9 04		    cmp #4
+   353 3ABE D0 03 4C B6 3B	    jeq jPhase4
+   354 3AC3			jPhase1
+   355 3AC3 A0 00		    ldy #0
+   356 3AC5			DinoLoop1
+   357 3AC5 B1 80		    lda (temp_w),y
+   358 3AC7 30 03		    bmi @+
+   359 3AC9 9D 00 33		    sta screen+$300,x
+   360 3ACC 18 A5 80 69 05 85 + @   adw temp_w #5
+   361 3AD7 B1 80		    lda (temp_w),y
+   362 3AD9 30 03		    bmi @+
+   363 3ADB 9D 00 34		    sta screen+$400,x
+   364 3ADE 18 A5 80 69 05 85 + @   adw temp_w #5
+   365 3AE9 B1 80		    lda (temp_w),y
+   366 3AEB 30 03		    bmi @+
+   367 3AED 9D 00 35		    sta screen+$500,x
+   368 3AF0 18 A5 80 69 05 85 + @   adw temp_w #5
+   369 3AFB B1 80		    lda (temp_w),y
+   370 3AFD 30 03		    bmi @+
+   371 3AFF 9D 00 36		    sta screen+$600,x
+   372 3B02 38 A5 80 E9 0F 85 + @   sbw temp_w #15
+   373 3B0D E8			    inx
+   374 3B0E C8			    iny
+   375 3B0F C0 05		    cpy #5  ; dino width
+   376 3B11 D0 B2		    bne DinoLoop1
+   377 3B13 60			    rts
+   378 3B14			jPhase2
+   379 3B14 A0 00		    ldy #0
+   380 3B16			DinoLoop2
+   381 3B16 B1 80		    lda (temp_w),y
+   382 3B18 30 03		    bmi @+
+   383 3B1A 9D 00 32		    sta screen+$200,x
+   384 3B1D 18 A5 80 69 05 85 + @   adw temp_w #5
+   385 3B28 B1 80		    lda (temp_w),y
+   386 3B2A 30 03		    bmi @+
+   387 3B2C 9D 00 33		    sta screen+$300,x
+   388 3B2F 18 A5 80 69 05 85 + @   adw temp_w #5
+   389 3B3A B1 80		    lda (temp_w),y
+   390 3B3C 30 03		    bmi @+
+   391 3B3E 9D 00 34		    sta screen+$400,x
+   392 3B41 18 A5 80 69 05 85 + @   adw temp_w #5
+   393 3B4C B1 80		    lda (temp_w),y
+   394 3B4E 30 03		    bmi @+
+   395 3B50 9D 00 35		    sta screen+$500,x
+   396 3B53 38 A5 80 E9 0F 85 + @   sbw temp_w #15
+   397 3B5E E8			    inx
+   398 3B5F C8			    iny
+   399 3B60 C0 05		    cpy #5  ; dino width
+   400 3B62 D0 B2		    bne DinoLoop2
+   401 3B64 60			    rts
+   402 3B65			jPhase3
+   403 3B65 A0 00		    ldy #0
+   404 3B67			DinoLoop3
+   405 3B67 B1 80		    lda (temp_w),y
+   406 3B69 30 03		    bmi @+
+   407 3B6B 9D 00 31		    sta screen+$100,x
+   408 3B6E 18 A5 80 69 05 85 + @   adw temp_w #5
+   409 3B79 B1 80		    lda (temp_w),y
+   410 3B7B 30 03		    bmi @+
+   411 3B7D 9D 00 32		    sta screen+$200,x
+   412 3B80 18 A5 80 69 05 85 + @   adw temp_w #5
+   413 3B8B B1 80		    lda (temp_w),y
+   414 3B8D 30 03		    bmi @+
+   415 3B8F 9D 00 33		    sta screen+$300,x
+   416 3B92 18 A5 80 69 05 85 + @   adw temp_w #5
+   417 3B9D B1 80		    lda (temp_w),y
+   418 3B9F 30 03		    bmi @+
+   419 3BA1 9D 00 34		    sta screen+$400,x
+   420 3BA4 38 A5 80 E9 0F 85 + @   sbw temp_w #15
+   421 3BAF E8			    inx
+   422 3BB0 C8			    iny
+   423 3BB1 C0 05		    cpy #5  ; dino width
+   424 3BB3 D0 B2		    bne DinoLoop3
+   425 3BB5 60			    rts
+   426 3BB6			jPhase4
+   427 3BB6 A0 00		    ldy #0
+   428 3BB8			DinoLoop4
+   429 3BB8 B1 80		    lda (temp_w),y
+   430 3BBA 30 03		    bmi @+
+   431 3BBC 9D 00 30		    sta screen,x
+   432 3BBF 18 A5 80 69 05 85 + @   adw temp_w #5
+   433 3BCA B1 80		    lda (temp_w),y
+   434 3BCC 30 03		    bmi @+
+   435 3BCE 9D 00 31		    sta screen+$100,x
+   436 3BD1 18 A5 80 69 05 85 + @   adw temp_w #5
+   437 3BDC B1 80		    lda (temp_w),y
+   438 3BDE 30 03		    bmi @+
+   439 3BE0 9D 00 32		    sta screen+$200,x
+   440 3BE3 18 A5 80 69 05 85 + @   adw temp_w #5
+   441 3BEE B1 80		    lda (temp_w),y
+   442 3BF0 30 03		    bmi @+
+   443 3BF2 9D 00 33		    sta screen+$300,x
+   444 3BF5 38 A5 80 E9 0F 85 + @   sbw temp_w #15
+   445 3C00 E8			    inx
+   446 3C01 C8			    iny
+   447 3C02 C0 05		    cpy #5  ; dino width
+   448 3C04 D0 B2		    bne DinoLoop4
+   449 3C06 60			    rts
+   450 				.endp
+   451 				;-----------------------------------------------
+   452 3C07			.proc CheckJoy
+   453 3C07 A5 84		    lda DinoState
+   454 3C09 C9 04		    cmp #4  ; jump state
+   455 3C0B F0 12		    beq NoChange
+   456 3C0D AD 78 02		    lda STICK0
+   457 3C10 29 02		    and #%00000010  ; down
+   458 3C12 F0 15		    beq Down
+   459 3C14 AD 78 02		    lda STICK0
+   460 3C17 29 01		    and #%00000001  ; up
+   461 3C19 F0 05		    beq Up
+   462 				    ; no change state (temporary set to 0)
+   463 3C1B A9 00		    lda #0
    464 3C1D 85 84		    sta DinoState
-   465 3C1F A9 00		    lda #0
-   466 3C21 85 85		    sta JumpPhase
-   467 3C23 60			    rts
-   468 3C24			Down
-   469 3C24 A9 02		    lda #2
-   470 3C26 85 84		    sta DinoState
+   465 3C1F			NoChange
+   466 3C1F 60			    rts
+   467 3C20 A9 04		Up  lda #4
+   468 3C22 85 84		    sta DinoState
+   469 3C24 A9 00		    lda #0
+   470 3C26 85 85		    sta JumpPhase
    471 3C28 60			    rts
-   472 				.endp
-   473 				;-----------------------------------------------
-   474 3C29			.proc SetStart
-   475 3C29 20 32 39		    jsr ClearWorld
-   476 3C2C A9 00		    lda #0
-   477 3C2E 85 83		    sta DinoWalkPhase
-   478 3C30 A9 00		    lda #0
-   479 3C32 85 84		    sta DinoState
-   480 3C34 8D C5 02		    sta COLOR1
-   481 3C37 A0 00		    ldy #0
-   482 3C39			FadeColor
-   483 3C39 8C C6 02		    sty COLOR2
-   484 3C3C 8C C8 02		    sty COLOR4
-   485 3C3F			    waitRTC
+   472 3C29			Down
+   473 3C29 A9 02		    lda #2
+   474 3C2B 85 84		    sta DinoState
+   475 3C2D 60			    rts
+   476 				.endp
+   477 				;-----------------------------------------------
+   478 3C2E			.proc SetStart
+   479 3C2E 20 37 39		    jsr ClearWorld
+   480 3C31 A9 00		    lda #0
+   481 3C33 85 83		    sta DinoWalkPhase
+   482 3C35 A9 00		    lda #0
+   483 3C37 85 84		    sta DinoState
+   484 3C39 8D C5 02		    sta COLOR1
+   485 3C3C A0 00		    ldy #0
+   486 3C3E			FadeColor
+   487 3C3E 8C C6 02		    sty COLOR2
+   488 3C41 8C C8 02		    sty COLOR4
+   489 3C44			    waitRTC
 Macro: WAITRTC [Source: MACRO.ASM]
-     1 3C3F A5 14			lda RTCLOK+2
-     2 3C41 C5 14		?wa	cmp RTCLOK+2
-     3 3C43 F0 FC			beq ?wa
+     1 3C44 A5 14			lda RTCLOK+2
+     2 3C46 C5 14		?wa	cmp RTCLOK+2
+     3 3C48 F0 FC			beq ?wa
 Source: dino.asm
-   486 3C45 C8			    iny
-   487 3C46 C0 10		    cpy #$10
-   488 3C48 D0 EF		    bne FadeColor
-   489 3C4A A9 0F		    lda #$0f
-   490 3C4C 8D C6 02		    sta COLOR2
-   491 3C4F 8D C8 02		    sta COLOR4
-   492 3C52 60			    rts
-   493 				.endp
-   494 				;-----------------------------------------------
-   495 3C53			.proc SetGameScreen
-   496 3C53 A9 00 8D 30 02 A9 +     mwa #GameDL dlptrs
-   497 3C5D A9 3E		    lda #%00111110  ; normal screen width, DL on, P/M on
-   498 3C5F 8D 2F 02		    sta dmactls
-   499 3C62 A9 20 8D F4 02	    mva #>font1 chbas
-   500 3C67 60			    rts
-   501 				.endp
-   502 				;--------------------------------------------------
-   503 3C68			    icl 'artwork/shapes.asm'
+   490 3C4A C8			    iny
+   491 3C4B C0 10		    cpy #$10
+   492 3C4D D0 EF		    bne FadeColor
+   493 3C4F A9 0F		    lda #$0f
+   494 3C51 8D C6 02		    sta COLOR2
+   495 3C54 8D C8 02		    sta COLOR4
+   496 3C57 60			    rts
+   497 				.endp
+   498 				;-----------------------------------------------
+   499 3C58			.proc SetGameScreen
+   500 3C58 A9 00 8D 30 02 A9 +     mwa #GameDL dlptrs
+   501 3C62 A9 3E		    lda #%00111110  ; normal screen width, DL on, P/M on
+   502 3C64 8D 2F 02		    sta dmactls
+   503 3C67 A9 20 8D F4 02	    mva #>font1 chbas
+   504 3C6C 60			    rts
+   505 				.endp
+   506 				;--------------------------------------------------
+   507 3C6D			    icl 'artwork/shapes.asm'
 Source: shapes.asm
      1 				;   @com.wudsn.ide.asm.mainsourcefile=dino.asm
      2
      3 				    .IF *>0 ;this is a trick that prevents compiling this file alone
      4
      5 				; dno run
-     6 3C68			dino_run_0  ; anly '0' jumps
-     7 3C68 FF 23 27 2B FF	    .by $ff, $23, $27, $2b, $ff ; '.   .'
-     8 3C6D 20 24 28 2C FF	    .by $20, $24, $28, $2c, $ff ; ' ## .'
-     9 3C72 21 25 29 FF FF	    .by $21, $25, $29, $ff, $ff ; '## ..'
-    10 3C77 22 26 2A FF FF	    .by $22, $26, $2a, $ff, $ff ; '## ..'
-    11 3C7C			dino_run_1
-    12 3C7C FF 23 27 2B FF	    .by $ff, $23, $27, $2b, $ff ; '.   .'
-    13 3C81 20 24 28 2C FF	    .by $20, $24, $28, $2c, $ff ; ' ## .'
-    14 3C86 21 25 29 FF FF	    .by $21, $25, $29, $ff, $ff ; '## ..'
-    15 3C8B 2D 2E 2F FF FF	    .by $2d, $2e, $2f, $ff, $ff ; '## ..'
-    16 3C90			dino_run_2
-    17 3C90 FF 23 27 2B FF	    .by $ff, $23, $27, $2b, $ff ; '.   .'
-    18 3C95 20 24 28 2C FF	    .by $20, $24, $28, $2c, $ff ; ' ## .'
-    19 3C9A 21 25 29 FF FF	    .by $21, $25, $29, $ff, $ff ; '## ..'
-    20 3C9F 30 31 32 FF FF	    .by $30, $31, $32, $ff, $ff ; '## ..'
-    21 3CA4			dino_crouch_1
-    22 3CA4 FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
-    23 3CA9 FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
-    24 3CAE 33 34 35 36 37	    .by $33, $34, $35, $36, $37 ; '#### '
-    25 3CB3 38 39 3A 3B 3C	    .by $38, $39, $3a, $3b, $3c ; '#### '
-    26 3CB8			dino_crouch_2
-    27 3CB8 FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
-    28 3CBD FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
-    29 3CC2 33 34 35 36 37	    .by $33, $34, $35, $36, $37 ; '#### '
-    30 3CC7 3D 3E 3F 3B 3C	    .by $3d, $3e, $3f, $3b, $3c ; '#### '
-    31 3CCC			DinoShapesTableL
-    32 3CCC 7C			    .by <dino_run_1
-    33 3CCD 90			    .by <dino_run_2
-    34 3CCE A4			    .by <dino_crouch_1
-    35 3CCF B8			    .by <dino_crouch_2
-    36 3CD0 68			    .by <dino_run_0 ; jump
-    37 3CD1 68			    .by <dino_run_0 ; jump
-    38 3CD2			DinoShapesTableH
-    39 3CD2 3C			    .by >dino_run_1
-    40 3CD3 3C			    .by >dino_run_2
-    41 3CD4 3C			    .by >dino_crouch_1
-    42 3CD5 3C			    .by >dino_crouch_2
-    43 3CD6 3C			    .by >dino_run_0 ; jump
-    44 3CD7 3C			    .by >dino_run_0 ; jump
+     6 3C6D			dino_run_0  ; anly '0' jumps
+     7 3C6D FF 23 27 2B FF	    .by $ff, $23, $27, $2b, $ff ; '.   .'
+     8 3C72 20 24 28 2C FF	    .by $20, $24, $28, $2c, $ff ; ' ## .'
+     9 3C77 21 25 29 FF FF	    .by $21, $25, $29, $ff, $ff ; '## ..'
+    10 3C7C 22 26 2A FF FF	    .by $22, $26, $2a, $ff, $ff ; '## ..'
+    11 3C81			dino_run_1
+    12 3C81 FF 23 27 2B FF	    .by $ff, $23, $27, $2b, $ff ; '.   .'
+    13 3C86 20 24 28 2C FF	    .by $20, $24, $28, $2c, $ff ; ' ## .'
+    14 3C8B 21 25 29 FF FF	    .by $21, $25, $29, $ff, $ff ; '## ..'
+    15 3C90 2D 2E 2F FF FF	    .by $2d, $2e, $2f, $ff, $ff ; '## ..'
+    16 3C95			dino_run_2
+    17 3C95 FF 23 27 2B FF	    .by $ff, $23, $27, $2b, $ff ; '.   .'
+    18 3C9A 20 24 28 2C FF	    .by $20, $24, $28, $2c, $ff ; ' ## .'
+    19 3C9F 21 25 29 FF FF	    .by $21, $25, $29, $ff, $ff ; '## ..'
+    20 3CA4 30 31 32 FF FF	    .by $30, $31, $32, $ff, $ff ; '## ..'
+    21 3CA9			dino_crouch_1
+    22 3CA9 FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
+    23 3CAE FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
+    24 3CB3 33 34 35 36 37	    .by $33, $34, $35, $36, $37 ; '#### '
+    25 3CB8 38 39 3A 3B 3C	    .by $38, $39, $3a, $3b, $3c ; '#### '
+    26 3CBD			dino_crouch_2
+    27 3CBD FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
+    28 3CC2 FF FF FF FF FF	    .by $ff, $ff, $ff, $ff, $ff ; '.....'
+    29 3CC7 33 34 35 36 37	    .by $33, $34, $35, $36, $37 ; '#### '
+    30 3CCC 3D 3E 3F 3B 3C	    .by $3d, $3e, $3f, $3b, $3c ; '#### '
+    31 3CD1			DinoShapesTableL
+    32 3CD1 81			    .by <dino_run_1
+    33 3CD2 95			    .by <dino_run_2
+    34 3CD3 A9			    .by <dino_crouch_1
+    35 3CD4 BD			    .by <dino_crouch_2
+    36 3CD5 6D			    .by <dino_run_0 ; jump
+    37 3CD6 6D			    .by <dino_run_0 ; jump
+    38 3CD7			DinoShapesTableH
+    39 3CD7 3C			    .by >dino_run_1
+    40 3CD8 3C			    .by >dino_run_2
+    41 3CD9 3C			    .by >dino_crouch_1
+    42 3CDA 3C			    .by >dino_crouch_2
+    43 3CDB 3C			    .by >dino_run_0 ; jump
+    44 3CDC 3C			    .by >dino_run_0 ; jump
     45 				; other objects
-    46 3CD8			ground_0
-    47 3CD8 FF FF		    .by $ff, $ff    ; '..'
-    48 3CDA FF FF		    .by $ff, $ff    ; '..'
-    49 3CDC FF FF		    .by $ff, $ff    ; '..'
-    50 3CDE 52 52		    .by $52, $52    ; '##'
-    51 3CE0			bird_0
-    52 3CE0 FF FF		    .by $ff, $ff    ; '..'
-    53 3CE2 FF FF		    .by $ff, $ff    ; '..'
-    54 3CE4 40 41		    .by $40, $41    ; '##'
-    55 3CE6 52 52		    .by $52, $52    ; '##'
-    56 3CE8			bird_1
-    57 3CE8 FF FF		    .by $ff, $ff    ; '..'
-    58 3CEA 40 41		    .by $40, $41    ; '##'
-    59 3CEC FF FF		    .by $ff, $ff    ; '..'
-    60 3CEE 52 52		    .by $52, $52    ; '##'
-    61 3CF0			bird_2
-    62 3CF0 40 41		    .by $40, $41    ; '##'
-    63 3CF2 FF FF		    .by $ff, $ff    ; '..'
-    64 3CF4 FF FF		    .by $ff, $ff    ; ''.'
-    65 3CF6 52 52		    .by $52, $52    ; '##'
-    66 3CF8			bird_0a
-    67 3CF8 FF FF		    .by $ff, $ff    ; '..'
-    68 3CFA FF FF		    .by $ff, $ff    ; '..'
-    69 3CFC 42 43		    .by $42, $43    ; '##'
-    70 3CFE 52 52		    .by $52, $52    ; '##'
-    71 3D00			bird_1a
-    72 3D00 FF FF		    .by $ff, $ff    ; '..'
-    73 3D02 42 43		    .by $42, $43    ; '##'
-    74 3D04 FF FF		    .by $ff, $ff    ; '..'
-    75 3D06 52 52		    .by $52, $52    ; '##'
-    76 3D08			bird_2a
-    77 3D08 42 43		    .by $42, $43    ; '##'
-    78 3D0A FF FF		    .by $ff, $ff    ; '..'
-    79 3D0C FF FF		    .by $ff, $ff    ; ''.'
-    80 3D0E 52 52		    .by $52, $52    ; '##'
-    81 3D10			cactus_0
-    82 3D10 FF FF		    .by $ff, $ff    ; '..'
-    83 3D12 FF FF		    .by $ff, $ff    ; '..'
-    84 3D14 46 47		    .by $46, $47    ; '##'
-    85 3D16 44 45		    .by $44, $45    ; '##'
-    86 3D18			cactus_1
-    87 3D18 FF FF		    .by $ff, $ff    ; '..'
-    88 3D1A FF FF		    .by $ff, $ff    ; '..'
-    89 3D1C 4A 4B		    .by $4a, $4b    ; '##'
-    90 3D1E 48 49		    .by $48, $49    ; '##'
-    91 3D20			cactus_2
-    92 3D20 FF FF		    .by $ff, $ff    ; '..'
-    93 3D22 50 51		    .by $50, $51    ; '##'
-    94 3D24 4E 4F		    .by $4e, $4f    ; '##'
-    95 3D26 4C 4D		    .by $4c, $4d    ; '##'
-    96 3D28			cactus_3
-    97 3D28 FF FF		    .by $ff, $ff    ; '..'
-    98 3D2A 57 FF		    .by $57, $ff    ; '#.'
-    99 3D2C 56 FF		    .by $56, $ff    ; '#.'
-   100 3D2E 55 52		    .by $55, $52    ; '##'
-   101 3D30			cactus_4
-   102 3D30 FF FF		    .by $ff, $ff    ; '..'
-   103 3D32 FF FF		    .by $ff, $ff    ; '..'
-   104 3D34 59 FF		    .by $59, $ff    ; '#.'
-   105 3D36 58 52		    .by $58, $52    ; '##'
-   106 3D38			ground_1
-   107 3D38 FF FF		    .by $ff, $ff    ; '..'
-   108 3D3A FF FF		    .by $ff, $ff    ; '..'
-   109 3D3C FF FF		    .by $ff, $ff    ; '..'
-   110 3D3E 53 54		    .by $53, $54    ; '##'
-   111 3D40			ground_2
-   112 3D40 FF FF		    .by $ff, $ff    ; '..'
-   113 3D42 FF FF		    .by $ff, $ff    ; '..'
-   114 3D44 FF FF		    .by $ff, $ff    ; '..'
-   115 3D46 5A 52		    .by $5a, $52    ; '##'
+    46 3CDD			ground_0
+    47 3CDD FF FF		    .by $ff, $ff    ; '..'
+    48 3CDF FF FF		    .by $ff, $ff    ; '..'
+    49 3CE1 FF FF		    .by $ff, $ff    ; '..'
+    50 3CE3 52 52		    .by $52, $52    ; '##'
+    51 3CE5			bird_0
+    52 3CE5 FF FF		    .by $ff, $ff    ; '..'
+    53 3CE7 FF FF		    .by $ff, $ff    ; '..'
+    54 3CE9 40 41		    .by $40, $41    ; '##'
+    55 3CEB 52 52		    .by $52, $52    ; '##'
+    56 3CED			bird_1
+    57 3CED FF FF		    .by $ff, $ff    ; '..'
+    58 3CEF 40 41		    .by $40, $41    ; '##'
+    59 3CF1 FF FF		    .by $ff, $ff    ; '..'
+    60 3CF3 52 52		    .by $52, $52    ; '##'
+    61 3CF5			bird_2
+    62 3CF5 40 41		    .by $40, $41    ; '##'
+    63 3CF7 FF FF		    .by $ff, $ff    ; '..'
+    64 3CF9 FF FF		    .by $ff, $ff    ; ''.'
+    65 3CFB 52 52		    .by $52, $52    ; '##'
+    66 3CFD			bird_0a
+    67 3CFD FF FF		    .by $ff, $ff    ; '..'
+    68 3CFF FF FF		    .by $ff, $ff    ; '..'
+    69 3D01 42 43		    .by $42, $43    ; '##'
+    70 3D03 52 52		    .by $52, $52    ; '##'
+    71 3D05			bird_1a
+    72 3D05 FF FF		    .by $ff, $ff    ; '..'
+    73 3D07 42 43		    .by $42, $43    ; '##'
+    74 3D09 FF FF		    .by $ff, $ff    ; '..'
+    75 3D0B 52 52		    .by $52, $52    ; '##'
+    76 3D0D			bird_2a
+    77 3D0D 42 43		    .by $42, $43    ; '##'
+    78 3D0F FF FF		    .by $ff, $ff    ; '..'
+    79 3D11 FF FF		    .by $ff, $ff    ; ''.'
+    80 3D13 52 52		    .by $52, $52    ; '##'
+    81 3D15			cactus_0
+    82 3D15 FF FF		    .by $ff, $ff    ; '..'
+    83 3D17 FF FF		    .by $ff, $ff    ; '..'
+    84 3D19 46 47		    .by $46, $47    ; '##'
+    85 3D1B 44 45		    .by $44, $45    ; '##'
+    86 3D1D			cactus_1
+    87 3D1D FF FF		    .by $ff, $ff    ; '..'
+    88 3D1F FF FF		    .by $ff, $ff    ; '..'
+    89 3D21 4A 4B		    .by $4a, $4b    ; '##'
+    90 3D23 48 49		    .by $48, $49    ; '##'
+    91 3D25			cactus_2
+    92 3D25 FF FF		    .by $ff, $ff    ; '..'
+    93 3D27 50 51		    .by $50, $51    ; '##'
+    94 3D29 4E 4F		    .by $4e, $4f    ; '##'
+    95 3D2B 4C 4D		    .by $4c, $4d    ; '##'
+    96 3D2D			cactus_3
+    97 3D2D FF FF		    .by $ff, $ff    ; '..'
+    98 3D2F 57 FF		    .by $57, $ff    ; '#.'
+    99 3D31 56 FF		    .by $56, $ff    ; '#.'
+   100 3D33 55 52		    .by $55, $52    ; '##'
+   101 3D35			cactus_4
+   102 3D35 FF FF		    .by $ff, $ff    ; '..'
+   103 3D37 FF FF		    .by $ff, $ff    ; '..'
+   104 3D39 59 FF		    .by $59, $ff    ; '#.'
+   105 3D3B 58 52		    .by $58, $52    ; '##'
+   106 3D3D			ground_1
+   107 3D3D FF FF		    .by $ff, $ff    ; '..'
+   108 3D3F FF FF		    .by $ff, $ff    ; '..'
+   109 3D41 FF FF		    .by $ff, $ff    ; '..'
+   110 3D43 53 54		    .by $53, $54    ; '##'
+   111 3D45			ground_2
+   112 3D45 FF FF		    .by $ff, $ff    ; '..'
+   113 3D47 FF FF		    .by $ff, $ff    ; '..'
+   114 3D49 FF FF		    .by $ff, $ff    ; '..'
+   115 3D4B 5A 52		    .by $5a, $52    ; '##'
    116
-   117 3D48			ShapesTableL
-   118 3D48 D8			    .by <ground_0
-   119 3D49 D8			    .by <ground_0
-   120 3D4A E0			    .by <bird_0
-   121 3D4B F8			    .by <bird_0a
-   122 3D4C E8			    .by <bird_1
-   123 3D4D 00			    .by <bird_1a
-   124 3D4E F0			    .by <bird_2
-   125 3D4F 08			    .by <bird_2a
-   126 3D50 10			    .by <cactus_0
-   127 3D51 18			    .by <cactus_1
-   128 3D52 20			    .by <cactus_2
-   129 3D53 28			    .by <cactus_3
-   130 3D54 30			    .by <cactus_4
-   131 3D55 38			    .by <ground_1
-   132 3D56 40			    .by <ground_2
-   133 3D57			ShapesTableH
-   134 3D57 3C			    .by >ground_0
-   135 3D58 3C			    .by >ground_0
-   136 3D59 3C			    .by >bird_0
-   137 3D5A 3C			    .by >bird_0a
-   138 3D5B 3C			    .by >bird_1
-   139 3D5C 3D			    .by >bird_1a
-   140 3D5D 3C			    .by >bird_2
-   141 3D5E 3D			    .by >bird_2a
-   142 3D5F 3D			    .by >cactus_0
-   143 3D60 3D			    .by >cactus_1
-   144 3D61 3D			    .by >cactus_2
-   145 3D62 3D			    .by >cactus_3
-   146 3D63 3D			    .by >cactus_4
-   147 3D64 3D			    .by >ground_1
-   148 3D65 3D			    .by >ground_2
-   149 3D66			diff_object_gap ; min distance between obstacles by difficulty level
-   150 3D66 14 13 12 11 10 0F +     :DIFF_LEVELS .by 20-#
+   117 3D4D			ShapesTableL
+   118 3D4D DD			    .by <ground_0
+   119 3D4E DD			    .by <ground_0
+   120 3D4F E5			    .by <bird_0
+   121 3D50 FD			    .by <bird_0a
+   122 3D51 ED			    .by <bird_1
+   123 3D52 05			    .by <bird_1a
+   124 3D53 F5			    .by <bird_2
+   125 3D54 0D			    .by <bird_2a
+   126 3D55 15			    .by <cactus_0
+   127 3D56 1D			    .by <cactus_1
+   128 3D57 25			    .by <cactus_2
+   129 3D58 2D			    .by <cactus_3
+   130 3D59 35			    .by <cactus_4
+   131 3D5A 3D			    .by <ground_1
+   132 3D5B 45			    .by <ground_2
+   133 3D5C			ShapesTableH
+   134 3D5C 3C			    .by >ground_0
+   135 3D5D 3C			    .by >ground_0
+   136 3D5E 3C			    .by >bird_0
+   137 3D5F 3C			    .by >bird_0a
+   138 3D60 3C			    .by >bird_1
+   139 3D61 3D			    .by >bird_1a
+   140 3D62 3C			    .by >bird_2
+   141 3D63 3D			    .by >bird_2a
+   142 3D64 3D			    .by >cactus_0
+   143 3D65 3D			    .by >cactus_1
+   144 3D66 3D			    .by >cactus_2
+   145 3D67 3D			    .by >cactus_3
+   146 3D68 3D			    .by >cactus_4
+   147 3D69 3D			    .by >ground_1
+   148 3D6A 3D			    .by >ground_2
+   149 3D6B			diff_object_gap ; min distance between obstacles by difficulty level
+   150 3D6B 14 13 12 11 10 0F +     :DIFF_LEVELS .by 20-#
    151 				;----------vars----------
-   152 = 3D76			diff_level  .ds 1
-   153 3D77-3D7E> 01 02 03 04 + DinoJumpTr  .by 1,2,3,4,4,3,2,1
+   152 = 3D7B			diff_level  .ds 1
+   153 3D7C-3D83> 01 02 03 04 + DinoJumpTr  .by 1,2,3,4,4,3,2,1
    154 = 0008			JumpLen = 8
    155 				.endif  ; .IF *>0
-   504 				;--------------------------------------------------
-   505
-   506 02E0-02E1> 65 38		    run FirstSTART
+   508 				;--------------------------------------------------
+   509
+   510 02E0-02E1> 6A 38		    run FirstSTART
