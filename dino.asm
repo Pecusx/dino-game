@@ -159,7 +159,7 @@ CopyLoop
     rts
 .endp
 .proc ClearScreen
-    ldy #WORLD_LENGTH ; TODO: shouldn't be -1?
+    ldy #44 ; visible screen len
     lda #0
 ClearLoop
     sta screen+$700,y
@@ -167,8 +167,10 @@ ClearLoop
     sta screen+$500,y
     sta screen+$400,y
     sta screen+$300,y
+    sta screen+$200,y
+    sta screen+$100,y
     dey
-    bpl ClearLoop
+    bne ClearLoop
     rts
 .endp
 ;-----------------------------------------------
