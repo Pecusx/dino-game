@@ -212,6 +212,9 @@ Shift
     bne @-
     ;all zeroes
 insertObject
+    lda RANDOM
+    and #%00000001  ; insert 50/50
+    beq noInsert
     mva #1 WorldTable+WORLD_LENGTH-2
     inc diff_level
     

@@ -80,7 +80,7 @@ ShapesTableH
     .by >bird_2
     .by >cactus_0
 diff_object_gap ; min distance between obstacles by difficulty level
-    :16 .by 20-#
+    :DIFF_LEVELS .by 20-#
 ;----------vars----------
 diff_level  .ds 1
 
