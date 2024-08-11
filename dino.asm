@@ -12,6 +12,7 @@ DIFF_LEVELS = 16
     .zpvar temp_b   .byte
     .zpvar DinoWalkPhase    .byte
     .zpvar DinoState    .byte   ; 0/1 - walk, 2/3 - crouch, 4... - jump 
+    .zpvar JumpPhase    .byte
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
@@ -93,10 +94,6 @@ EndLoop
     jsr WorldShift
     jsr WorldToScreen
     jsr CheckJoy
-    ldx #5 ; position
-    lda DinoState
-    ora DinoWalkPhase  ; shape
-    tay
     jsr ShowDino
     waitRTC                   ; or waitRTC ?
     ;key
@@ -115,7 +112,7 @@ EndLoop
     mva #1 hscrol
     waitRTC                   ; or waitRTC ?
     ;key
-    jsr AnimateBirds
+    jsr Animate
     mva #>font1 chbas
     waitRTC                   ; or waitRTC ?
     mva #4 hscrol
@@ -231,7 +228,7 @@ noInsert
     rts
 .endp
 ;-----------------------------------------------
-.proc AnimateBirds
+.proc Animate
     ldy #WORLD_LENGTH
 @   lda WorldTable,y
     tax
@@ -246,9 +243,24 @@ noInsert
 NoBird
     dey
     bpl @-
+    ; animate Dino
     lda DinoWalkPhase
     eor #%00000001
     sta DinoWalkPhase
+    ; jump
+    lda DinoState
+    cmp #4  ; jump state
+    bne NoJump
+    lda JumpPhase
+    cmp #6  ; max jump phase
+    beq EndJump
+    inc JumpPhase
+    rts
+EndJump
+    lda #0
+    sta JumpPhase
+    sta DinoState
+NoJump
     rts
 .endp
 ;-----------------------------------------------
@@ -287,14 +299,20 @@ ObjectLoop
 .endp
 ;-----------------------------------------------
 ; Show Dino on screen (test)
-; X - y position
-; Y - shape nr
 ;-----------------------------------------------
 .proc ShowDino
+    ldx #5 ; position
+    lda DinoState
+    ora DinoWalkPhase  ; shape
+    tay
     lda DinoShapesTableL,y
     sta temp_w
     lda DinoShapesTableH,y
     sta temp_w+1
+    cpy #4  ; jump
+    beq Jump
+    cpy #5  ; jump
+    beq Jump
     ldy #0
 DinoLoop
     lda (temp_w),y
@@ -318,9 +336,91 @@ DinoLoop
     cpy #5  ; dino width
     bne DinoLoop
     rts
+Jump
+    ldy JumpPhase
+    lda DinoJumpTr,y
+    cmp #2
+    beq jPhase2
+    cmp #3
+    jeq jPhase3
+jPhase1
+    ldy #0
+DinoLoop1
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$400,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$500,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$600,x
+@   sbw temp_w #15
+    inx
+    iny
+    cpy #5  ; dino width
+    bne DinoLoop1
+    rts
+jPhase2
+    ldy #0
+DinoLoop2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$200,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$400,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$500,x
+@   sbw temp_w #15
+    inx
+    iny
+    cpy #5  ; dino width
+    bne DinoLoop2
+    rts
+jPhase3
+    ldy #0
+DinoLoop3
+    lda (temp_w),y
+    bmi @+
+    sta screen+$100,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$200,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$400,x
+@   sbw temp_w #15
+    inx
+    iny
+    cpy #5  ; dino width
+    bne DinoLoop3
+    rts
 .endp
 ;-----------------------------------------------
 .proc CheckJoy
+    lda DinoState
+    cmp #4  ; jump state
+    beq NoChange
     lda STICK0
     and #%00000010  ; down
     beq Down
@@ -330,9 +430,12 @@ DinoLoop
     ; no change state (temporary set to 0)
     lda #0
     sta DinoState
+NoChange
     rts
 Up  lda #4
     sta DinoState
+    lda #0
+    sta JumpPhase
     rts
 Down
     lda #2

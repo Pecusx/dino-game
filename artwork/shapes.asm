@@ -34,11 +34,13 @@ DinoShapesTableL
     .by <dino_crouch_1
     .by <dino_crouch_2
     .by <dino_run_0 ; jump
+    .by <dino_run_0 ; jump
 DinoShapesTableH
     .by >dino_run_1
     .by >dino_run_2
     .by >dino_crouch_1
     .by >dino_crouch_2
+    .by >dino_run_0 ; jump
     .by >dino_run_0 ; jump
 ; other objects
 ground_0
@@ -106,6 +108,5 @@ diff_object_gap ; min distance between obstacles by difficulty level
     :DIFF_LEVELS .by 20-#
 ;----------vars----------
 diff_level  .ds 1
-
-   
+DinoJumpTr  .by 1,2,3,3,2,1
 .endif  ; .IF *>0
