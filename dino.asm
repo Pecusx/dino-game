@@ -254,7 +254,7 @@ NoBird
     cmp #4  ; jump state
     bne NoJump
     lda JumpPhase
-    cmp #6  ; max jump phase
+    cmp #JumpLen  ; max jump phase
     beq EndJump
     inc JumpPhase
     rts
