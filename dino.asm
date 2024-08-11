@@ -92,6 +92,7 @@ FirstSTART
 EndLoop
     jsr WorldShift
     jsr WorldToScreen
+    jsr CheckJoy
     ldx #5 ; position
     lda DinoState
     ora DinoWalkPhase  ; shape
@@ -316,6 +317,26 @@ DinoLoop
     iny
     cpy #5  ; dino width
     bne DinoLoop
+    rts
+.endp
+;-----------------------------------------------
+.proc CheckJoy
+    lda STICK0
+    and #%00000010  ; down
+    beq Down
+    lda STICK0
+    and #%00000001  ; up
+    beq Up
+    ; no change state (temporary set to 0)
+    lda #0
+    sta DinoState
+    rts
+Up  lda #4
+    sta DinoState
+    rts
+Down
+    lda #2
+    sta DinoState
     rts
 .endp
 ;-----------------------------------------------
