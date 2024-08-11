@@ -1246,7 +1246,7 @@ Source: dino.asm
    260 39D9 C9 04		    cmp #4  ; jump state
    261 39DB D0 0F		    bne NoJump
    262 39DD A5 85		    lda JumpPhase
-   263 39DF C9 08		    cmp #JumpLen  ; max jump phase
+   263 39DF C9 07		    cmp #JumpLen  ; max jump phase
    264 39E1 F0 03		    beq EndJump
    265 39E3 E6 85		    inc JumpPhase
    266 39E5 60			    rts
@@ -1661,7 +1661,7 @@ Source: shapes.asm
    151 				;----------vars----------
    152 = 3D93			diff_level  .ds 1
    153 3D94-3D9B> 01 02 03 04 + DinoJumpTr  .by 1,2,3,4,4,3,2,1
-   154 = 0008			JumpLen = 8
+   154 = 0007			JumpLen = 7
    155 				.endif  ; .IF *>0
    519 				;--------------------------------------------------
    520

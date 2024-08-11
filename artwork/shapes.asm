@@ -151,5 +151,5 @@ diff_object_gap ; min distance between obstacles by difficulty level
 ;----------vars----------
 diff_level  .ds 1
 DinoJumpTr  .by 1,2,3,4,4,3,2,1
-JumpLen = 8
+JumpLen = 7
 .endif  ; .IF *>0
