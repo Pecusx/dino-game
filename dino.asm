@@ -22,7 +22,7 @@ DIFF_LEVELS = 16
     mva #0 dmactls             ; dark screen
     mva #$ff portb
     ; and wait one frame :)
-    seq:wait                   ; or waitRTC ?
+    waitRTC                   ; or waitRTC ?
     mva #$ff portb        ; BASIC off
     rts
     ini $2000
@@ -62,8 +62,8 @@ WorldTable
 ;---------------------------------------------------
 FirstSTART
     jsr GenerateCharsets
-    jsr SetStart
     jsr SetGameScreen
+    jsr SetStart
     mva #0 diff_level
     
     ; test only (some object in the world)

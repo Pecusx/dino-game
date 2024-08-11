@@ -934,23 +934,17 @@ Source: MACRO.ASM
     19 				;---------------------------------------------------
     20 				    ; dark screean and BASIC off
     21 				    ORG $2000
-    22 FFFF> 2000-2024> A9 00 +     mva #0 dmactls             ; dark screen
+    22 FFFF> 2000-2015> A9 00 +     mva #0 dmactls             ; dark screen
     23 2005 A9 FF 8D 01 D3	    mva #$ff portb
     24 				    ; and wait one frame :)
-    25 200A F0 13200C		 wait                   
-Macro: WAIT [Source: MACRO.ASM]
-     3 200C AD 0B D4		?ze	LDA VCOUNT
-     4 200F C9 10			cmp #16	; if line<16 then wait for line>15 (long VBI protection)
-     5 2011 90 F9			bcc ?ze
-     6 2013 E9 0A			sbc #10	; last lines correction
-     7 2015 CD 0B D4		?wa	cmp VCOUNT
-     8 2018 90 FB			bcc ?wa
-     9 201A CD 0B D4		?wf	cmp VCOUNT
-    10 201D B0 FB			bcs ?wf
+    25 200A			    waitRTC                   ; or waitRTC ?
+Macro: WAITRTC [Source: MACRO.ASM]
+     1 200A A5 14			lda RTCLOK+2
+     2 200C C5 14		?wa	cmp RTCLOK+2
+     3 200E F0 FC			beq ?wa
 Source: dino.asm
-    seq:wait                   ; or waitRTC ?
-    26 201F A9 FF 8D 01 D3	    mva #$ff portb        ; BASIC off
-    27 2024 60			    rts
+    26 2010 A9 FF 8D 01 D3	    mva #$ff portb        ; BASIC off
+    27 2015 60			    rts
     28 02E2-02E3> 00 20		    ini $2000
     29 				;---------------------------------------------------
     30
@@ -1014,8 +1008,8 @@ Source: dino.asm
     62 				;---------------------------------------------------
     63 386A			FirstSTART
     64 386A 20 0D 39		    jsr GenerateCharsets
-    65 386D 20 46 3C		    jsr SetStart
-    66 3870 20 70 3C		    jsr SetGameScreen
+    65 386D 20 70 3C		    jsr SetGameScreen
+    66 3870 20 46 3C		    jsr SetStart
     67 3873 A9 00 8D 93 3D	    mva #0 diff_level
     68 				    
     69 				    ; test only (some object in the world)
