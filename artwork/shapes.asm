@@ -80,9 +80,19 @@ bird_2a
     .by $52, $52    ; '##'
 cactus_0
     .by $ff, $ff    ; '..'
-    .by $54, $54    ; '##'
-    .by $54, $54    ; '##'
-    .by $52, $52    ; '##'
+    .by $ff, $ff    ; '..'
+    .by $46, $47    ; '##'
+    .by $44, $45    ; '##'
+cactus_1
+    .by $ff, $ff    ; '..'
+    .by $ff, $ff    ; '..'
+    .by $4a, $4b    ; '##'
+    .by $48, $49    ; '##'
+cactus_2
+    .by $ff, $ff    ; '..'
+    .by $50, $51    ; '##'
+    .by $4e, $4f    ; '##'
+    .by $4c, $4d    ; '##'
 
 ShapesTableL
     .by <ground_0
@@ -94,6 +104,8 @@ ShapesTableL
     .by <bird_2
     .by <bird_2a
     .by <cactus_0
+    .by <cactus_1
+    .by <cactus_2
 ShapesTableH
     .by >ground_0
     .by >ground_0
@@ -104,6 +116,8 @@ ShapesTableH
     .by >bird_2
     .by >bird_2a
     .by >cactus_0
+    .by >cactus_1
+    .by >cactus_2
 diff_object_gap ; min distance between obstacles by difficulty level
     :DIFF_LEVELS .by 20-#
 ;----------vars----------

@@ -218,8 +218,10 @@ insertObject
     lda RANDOM
     and #%00000001  ; insert 50/50
     beq noInsert
-    mva #6 WorldTable+WORLD_LENGTH-2
-    mva #6+$80 WorldTable+WORLD_LENGTH-1
+    randomize 8 10  ; cactuses
+    sta WorldTable+WORLD_LENGTH-2
+    ora #$80
+    sta WorldTable+WORLD_LENGTH-1
     inc diff_level
     
     
