@@ -461,7 +461,16 @@ DinoLoop4
     lda STICK0
     and #%00000001  ; up
     beq Up
-    ; no change state (temporary set to 0)
+    ; check keyboard
+    lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq Down
+    cmp #$ff
+    beq Walk
+    lda kbcode
+    cmp #@kbcode._space
+    beq Up
+Walk
     lda #0
     sta DinoState
 NoChange
