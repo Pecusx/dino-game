@@ -23,7 +23,7 @@
 
     org $2000
 screen
-    ins 'difficulties.bmp',+146
+    ins 'difficulties.bmp',+62
 DL
     :13 .by SKIP8
     .by MODEF+LMS
