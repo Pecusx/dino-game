@@ -64,9 +64,35 @@ WorldTable
 FirstSTART
     jsr GenerateCharsets
     jsr SetGameScreen
-    jsr FadeColors
-NewGame    
-    jsr SetStart        
+    jsr SetStart
+    
+    ; test only (some object in the world)
+    lda #1  ;bird0
+    sta WorldTable+10
+    lda #4  ;cactus
+    sta WorldTable+20
+    lda #4+$80  ; cactus (second char)
+    sta WorldTable+21
+    ;
+    ldx #5 ; position
+    ldy #0  ; shape
+    jsr ShowDino
+    ldx #10 ; position
+    ldy #1  ; shape
+    jsr ShowDino
+    ldx #15 ; position
+    ldy #2  ; shape
+    jsr ShowDino
+    ldx #20 ; position
+    ldy #3  ; shape
+    jsr ShowDino
+    ldx #25 ; position
+    ldy #4  ; shape
+    jsr ShowDino
+    mva #$50 screen+$700+32
+    
+    mva #0 diff_level
+    sta Hit
 EndLoop
     ;lda #$32
     ;sta COLBAK
@@ -101,8 +127,7 @@ EndLoop
     mva #4 hscrol
     jmp EndLoop
 EndGame
-    key
-    jmp NewGame
+    halt
     rts
 
 ;-----------------------------------------------
@@ -543,15 +568,10 @@ Down
     jsr ClearWorld
     lda #0
     sta DinoWalkPhase
+    lda #0
     sta DinoState
-    sta diff_level
-    sta Hit
-    rts
-.endp
-;-----------------------------------------------
-.proc FadeColors
+    sta COLOR1
     ldy #0
-    sty COLOR1
 FadeColor
     sty COLOR2
     sty COLOR4
