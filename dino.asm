@@ -59,7 +59,8 @@ GameDL
     :13 .byte SKIP8   ; empty lines
 
     .byte MODE2+LMS   ; gr.8+LMS
-    .word status_line
+status_line_addr
+    .word status_line_r
 
     .byte SKIP8 ; empty lines
 
@@ -70,11 +71,16 @@ line:1_addr
     .endr
     .byte JVB   
     .word GameDL
-status_line
+status_line_r
     dta d"  l-hi 00000  r-hi 00000         00000  "
-score=status_line+33
-rhiscore=status_line+19
-lhiscore=status_line+7
+status_line_l
+    dta d"  00000         00000 ih-r  00000 ih-l  "
+score=status_line_r+33
+rhiscore=status_line_r+19
+lhiscore=status_line_r+7
+scorel=status_line_l+2
+rhiscorel=status_line_l+16
+lhiscorel=status_line_l+28
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
@@ -83,12 +89,14 @@ WorldTable
 FirstSTART
     jsr GenerateCharsets
     jsr SetGameScreen
-    jsr FadeColors
+    jsr FadeColorsIN
 NewGame    
+    jsr SetStatusToR
     jsr SetStart        
     jsr GameR
     key
     jsr HiScoreR
+    jsr SetStatusToL
     jsr SetStart        
     jsr GameL
     key
@@ -189,7 +197,7 @@ CopyLoop
     sta font2l+$300,y
     sta font3l+$300,y
     sta font4l+$300,y
-    ; dino characters - only to 'left' charsets
+    ; swap bits to make 'left' charsets
     lda font1+$100,y
     sta font1l+$100,y
     lda font2+$100,y
@@ -229,22 +237,27 @@ SwapLoop
     tax
     lda swap_table,x
     sta font4l+$100,y
+    lda font1,y
+    tax
+    lda swap_table,x
+    sta font1l,y
+    sta font2l,y
+    sta font3l,y
+    sta font4l,y
     lda font1+$200,y
     tax
     lda swap_table,x
     sta font1l+$200,y
-    lda font2+$200,y
-    tax
-    lda swap_table,x
     sta font2l+$200,y
-    lda font3+$200,y
-    tax
-    lda swap_table,x
     sta font3l+$200,y
-    lda font4+$200,y
+    sta font4l+$200,y
+    lda font1+$300,y
     tax
     lda swap_table,x
-    sta font4l+$200,y
+    sta font1l+$300,y
+    sta font2l+$300,y
+    sta font3l+$300,y
+    sta font4l+$300,y
     iny
     bne SwapLoop    
     rts
@@ -384,7 +397,15 @@ noInsert
     lda #$10    ; 0 character code
     sta score+1
     inc score
-ScoreReady 
+ScoreReady
+    ; move to second (left) score
+    ldy #4
+    ldx #0
+@   lda score,x
+    sta scorel,y
+    inx
+    dey
+    bpl @-
     rts
 .endp
 ;-----------------------------------------------
@@ -421,6 +442,22 @@ EndJump
     sta JumpPhase
     sta DinoState
 NoJump
+    rts
+.endp
+;---------------------------------------------------
+.proc SetStatusToL
+    lda #<status_line_l
+    sta status_line_addr
+    lda #>status_line_l
+    sta status_line_addr+1
+    rts
+.endp
+;---------------------------------------------------
+.proc SetStatusToR
+    lda #<status_line_r
+    sta status_line_addr
+    lda #>status_line_r
+    sta status_line_addr+1
     rts
 .endp
 ;-----------------------------------------------
@@ -913,6 +950,11 @@ Down
     sta score+2
     sta score+3
     sta score+4
+    sta scorel
+    sta scorel+1
+    sta scorel+2
+    sta scorel+3
+    sta scorel+4
     rts
 .endp
 ;-----------------------------------------------
@@ -953,6 +995,14 @@ higher4
 higher5
     lda score+4
     sta rhiscore+4
+    ; move score to 'left' status line
+    ldy #4
+    ldx #0
+@   lda rhiscore,x
+    sta rhiscorel,y
+    inx
+    dey
+    bpl @-
     rts
 .endp
 ;-----------------------------------------------
@@ -993,10 +1043,18 @@ higher4
 higher5
     lda score+4
     sta lhiscore+4
+    ; move score to 'left' status line
+    ldy #4
+    ldx #0
+@   lda lhiscore,x
+    sta lhiscorel,y
+    inx
+    dey
+    bpl @-
     rts
 .endp
 ;-----------------------------------------------
-.proc FadeColors
+.proc FadeColorsIN
     ldy #0
     sty COLOR1
 FadeColor
@@ -1007,6 +1065,20 @@ FadeColor
     cpy #$10
     bne FadeColor
     lda #$0f
+    sta COLOR2
+    sta COLOR4
+    rts
+.endp
+;-----------------------------------------------
+.proc FadeColorsOUT
+    ldy #$0f
+FadeColor
+    sty COLOR2
+    sty COLOR4
+    waitRTC
+    dey
+    bpl FadeColor
+    lda #$00
     sta COLOR2
     sta COLOR4
     rts
