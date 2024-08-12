@@ -85,7 +85,7 @@ lhiscorel=status_line_l+28
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
-    :WORLD_LENGTH .byte 0 ; ground
+    :WORLD_LENGTH+1 .byte 0 ; ground
 ;---------------------------------------------------
 FirstSTART
     jsr GenerateCharsets
@@ -265,7 +265,7 @@ SwapLoop
 .endp
 ;-----------------------------------------------
 .proc ClearWorld
-    ldy #WORLD_LENGTH-1 ; world size
+    ldy #WORLD_LENGTH ; world size
     lda #0  ; ground
 @   sta WorldTable,y
     dey
@@ -338,6 +338,8 @@ Shift
     lda #0  ;ground
     sta WorldTable,y
     ; or sometimes mountain :)
+    lda WorldTable-1,y
+    bne no_mountain
     lda RANDOM
     and #%00011111  ; 32:1
     bne no_mountain
