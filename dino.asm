@@ -47,7 +47,12 @@ screen
     .ds $100*SCR_HEIGHT
 ; display list
 GameDL
-    :15 .byte SKIP8   ; empty lines
+    :13 .byte SKIP8   ; empty lines
+
+    .byte MODE2+LMS   ; gr.8+LMS
+    .word status_line
+
+    .byte SKIP8 ; empty lines
 
     .rept SCR_HEIGHT, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
@@ -56,6 +61,9 @@ line:1_addr
     .endr
     .byte JVB   
     .word GameDL
+status_line
+    dta d"  l-hi 00000  r-hi 00000         00000  "
+score=status_line+33
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
@@ -173,6 +181,7 @@ NothingToDraw
 .endp
 ;-----------------------------------------------
 .proc WorldShift
+    jsr ScoreUp
     ldy #0
 Shift
     lda WorldTable+1,y
@@ -214,6 +223,36 @@ insertObject
     
     
 noInsert    
+    rts
+.endp
+;-----------------------------------------------
+.proc ScoreUp
+    inc score+4
+    lda score+4
+    cmp #$1a    ; 9+1 character code
+    bne ScoreReady
+    lda #$10    ; 0 character code
+    sta score+4
+    inc score+3
+    lda score+3
+    cmp #$1a    ; 9+1 character code
+    bne ScoreReady
+    lda #$10    ; 0 character code
+    sta score+3
+    inc score+2
+    lda score+2
+    cmp #$1a    ; 9+1 character code
+    bne ScoreReady
+    lda #$10    ; 0 character code
+    sta score+2
+    inc score+1
+    lda score+1
+    cmp #$1a    ; 9+1 character code
+    bne ScoreReady
+    lda #$10    ; 0 character code
+    sta score+1
+    inc score
+ScoreReady 
     rts
 .endp
 ;-----------------------------------------------
