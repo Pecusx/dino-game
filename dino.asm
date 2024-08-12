@@ -86,6 +86,14 @@ FirstSTART
 NewGame    
     jsr SetStart        
 EndLoop
+    jsr GameR
+    key
+    jsr HiScoreR
+    jmp NewGame
+    rts
+
+;-----------------------------------------------
+.proc GameR
     ;lda #$32
     ;sta COLBAK
     jsr WorldToScreen
@@ -111,11 +119,8 @@ EndLoop
     mva #4 hscrol
     jmp EndLoop
 EndGame
-    key
-    jsr HiScoreR
-    jmp NewGame
     rts
-
+.endp
 ;-----------------------------------------------
 ; Generation of character sets 2,3 and 4 of 1
 ; By copying and horizontal shift dino
@@ -397,7 +402,7 @@ ObjectLoop
     rts
 .endp
 ;-----------------------------------------------
-; Show Dino on screen (test)
+; Show Dino on screen and check collisions
 ;-----------------------------------------------
 .proc ShowDino
     ldx #5 ; position
