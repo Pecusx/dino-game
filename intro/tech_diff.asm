@@ -40,9 +40,7 @@ start
     sta COLBAK
     mva #15 COLOR1
     POKEY_INIT
-    lda #0
-    ;sta dmactls
-    ;sta dmactl
+    pause 3
     lda #0
     sta $d40e   ; wylaczamy NMI 
     sei         ; oraz IRQ
