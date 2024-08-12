@@ -179,4 +179,9 @@
       dex
       bne ?PAUSELOOP
     .ENDM
-
+;-------------------------------------
+    .MACRO POKEY_INIT
+    ;   Initialises Pokey chip (required before playing sounds)
+      mva #0 AUDCTL
+      mva #3 SKSTAT
+    .ENDM   
