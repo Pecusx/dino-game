@@ -64,6 +64,7 @@ line:1_addr
 status_line
     dta d"  l-hi 00000  r-hi 00000         00000  "
 score=status_line+33
+rhiscore=status_line+19
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
@@ -102,6 +103,7 @@ EndLoop
     jmp EndLoop
 EndGame
     key
+    jsr HiScoreR
     jmp NewGame
     rts
 
@@ -584,6 +586,46 @@ Down
     sta score+2
     sta score+3
     sta score+4
+    rts
+.endp
+;-----------------------------------------------
+.proc HiScoreR
+    lda rhiscore
+    cmp score
+    bcc higher1
+    bne lower
+    lda rhiscore+1
+    cmp score+1
+    bcc higher2
+    bne lower
+    lda rhiscore+2
+    cmp score+2
+    bcc higher3
+    bne lower
+    lda rhiscore+3
+    cmp score+3
+    bcc higher4
+    bne lower
+    lda rhiscore+4
+    cmp score+4
+    bcc higher5
+lower
+    rts
+higher1
+    lda score
+    sta rhiscore
+higher2
+    lda score+1
+    sta rhiscore+1
+higher3
+    lda score+2
+    sta rhiscore+2
+higher4
+    lda score+3
+    sta rhiscore+3
+higher5
+    lda score+4
+    sta rhiscore+4
     rts
 .endp
 ;-----------------------------------------------
