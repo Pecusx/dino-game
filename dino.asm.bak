@@ -6,6 +6,8 @@ DIFF_LEVELS = 16
 ;---------------------------------------------------
     OPT r+
 
+swap_table=$0600    ; table for swap bytes in left characters :)
+
 ;---------------------------------------------------
 ; Zpage variables
     .zpvar temp_w   .word = $80
@@ -40,7 +42,13 @@ font3 = font2+$400
     ins 'artwork/dino3.fnt'  ; 3 charset
 font4 = font3+$400
     ins 'artwork/dino4.fnt'  ; 4 charset
-    org font4+$400
+; and 4 charsets for left game :)
+font1l=font4+$400
+font2l=font1l+$400
+font3l=font2l+$400
+font4l=font3l+$400
+
+    org font4l+$400
 ; screen data
 ; SCR_HEIGHT lines 256bytes each
 screen
@@ -65,6 +73,7 @@ status_line
     dta d"  l-hi 00000  r-hi 00000         00000  "
 score=status_line+33
 rhiscore=status_line+19
+lhiscore=status_line+7
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
@@ -86,18 +95,18 @@ EndLoop
     ;lda #$5f
     ;sta COLBAK
     jsr CheckJoy
-    mva #>font2 chbas
+    mva #>font2l chbas
     waitRTC                   ; or waitRTC ?
     mva #3 hscrol
-    mva #>font3 chbas
+    mva #>font3l chbas
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
     jsr WorldShift  ; better place (flickering)
-    mva #>font4 chbas
+    mva #>font4l chbas
     waitRTC                   ; or waitRTC ?
     mva #1 hscrol
     jsr Animate
-    mva #>font1 chbas
+    mva #>font1l chbas
     waitRTC                   ; or waitRTC ?
     mva #4 hscrol
     jmp EndLoop
@@ -115,21 +124,89 @@ EndGame
     ; copy charset 1 to 2,3 and 4 (but not dino chars)
     ldy #0
 CopyLoop
+    ; no dino characters
     lda font1,y
     sta font2,y
     sta font3,y
     sta font4,y
+    sta font1l,y
+    sta font2l,y
+    sta font3l,y
+    sta font4l,y
     lda font1+$200,y
     sta font2+$200,y
     sta font3+$200,y
     sta font4+$200,y
+    sta font1l+$200,y
+    sta font2l+$200,y
+    sta font3l+$200,y
+    sta font4l+$200,y
     lda font1+$300,y
     sta font2+$300,y
     sta font3+$300,y
     sta font4+$300,y
+    sta font1l+$300,y
+    sta font2l+$300,y
+    sta font3l+$300,y
+    sta font4l+$300,y
+    ; dino characters - only to 'left' charsets
+    lda font1+$100,y
+    sta font1l+$100,y
+    lda font2+$100,y
+    sta font2l+$100,y
+    lda font3+$100,y
+    sta font3l+$100,y
+    lda font4+$100,y
+    sta font4l+$100,y  
     iny
     bne CopyLoop
-    
+    ; create table for swapping
+    ldy #0
+@   sty temp_b
+    .REPT 8
+    rol temp_b
+    ror @
+    .ENDR
+    sta swap_table,y
+    iny
+    bne @-
+    ; swap bits in bharacters
+    ldy #0
+SwapLoop
+    lda font1+$100,y
+    tax
+    lda swap_table,x
+    sta font1l+$100,y
+    lda font2+$100,y
+    tax
+    lda swap_table,x
+    sta font2l+$100,y
+    lda font3+$100,y
+    tax
+    lda swap_table,x
+    sta font3l+$100,y
+    lda font4+$100,y
+    tax
+    lda swap_table,x
+    sta font4l+$100,y
+    lda font1+$200,y
+    tax
+    lda swap_table,x
+    sta font1l+$200,y
+    lda font2+$200,y
+    tax
+    lda swap_table,x
+    sta font2l+$200,y
+    lda font3+$200,y
+    tax
+    lda swap_table,x
+    sta font3l+$200,y
+    lda font4+$200,y
+    tax
+    lda swap_table,x
+    sta font4l+$200,y
+    iny
+    bne SwapLoop    
     rts
 .endp
 ;-----------------------------------------------
@@ -593,18 +670,23 @@ Down
     lda rhiscore
     cmp score
     bcc higher1
+    bne lower
     lda rhiscore+1
     cmp score+1
     bcc higher2
+    bne lower
     lda rhiscore+2
     cmp score+2
     bcc higher3
+    bne lower
     lda rhiscore+3
     cmp score+3
     bcc higher4
+    bne lower
     lda rhiscore+4
     cmp score+4
     bcc higher5
+lower
     rts
 higher1
     lda score
@@ -621,6 +703,46 @@ higher4
 higher5
     lda score+4
     sta rhiscore+4
+    rts
+.endp
+;-----------------------------------------------
+.proc HiScoreL
+    lda lhiscore
+    cmp score
+    bcc higher1
+    bne lower
+    lda lhiscore+1
+    cmp score+1
+    bcc higher2
+    bne lower
+    lda lhiscore+2
+    cmp score+2
+    bcc higher3
+    bne lower
+    lda lhiscore+3
+    cmp score+3
+    bcc higher4
+    bne lower
+    lda lhiscore+4
+    cmp score+4
+    bcc higher5
+lower
+    rts
+higher1
+    lda score
+    sta lhiscore
+higher2
+    lda score+1
+    sta lhiscore+1
+higher3
+    lda score+2
+    sta lhiscore+2
+higher4
+    lda score+3
+    sta lhiscore+3
+higher5
+    lda score+4
+    sta lhiscore+4
     rts
 .endp
 ;-----------------------------------------------
