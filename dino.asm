@@ -12,6 +12,7 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 ; Zpage variables
     .zpvar temp_w   .word = $80
     .zpvar temp_b   .byte
+    .zpvar temp_b2   .byte
     .zpvar DinoWalkPhase    .byte
     .zpvar DinoState    .byte   ; 0/1 - walk, 2/3 - crouch, 4... - jump 
     .zpvar JumpPhase    .byte
@@ -85,15 +86,19 @@ FirstSTART
     jsr FadeColors
 NewGame    
     jsr SetStart        
-EndLoop
     jsr GameR
     key
     jsr HiScoreR
+    jsr SetStart        
+    jsr GameL
+    key
+    jsr HiScoreL   
     jmp NewGame
     rts
 
 ;-----------------------------------------------
 .proc GameR
+EndLoopR
     ;lda #$32
     ;sta COLBAK
     jsr WorldToScreen
@@ -117,8 +122,38 @@ EndLoop
     mva #>font1 chbas
     waitRTC                   ; or waitRTC ?
     mva #4 hscrol
-    jmp EndLoop
+    jmp EndLoopR
 EndGame
+    rts
+.endp
+;-----------------------------------------------
+.proc GameL
+EndLoopL
+    ;lda #$32
+    ;sta COLBAK
+    jsr WorldToScreenL
+    jsr ShowDinoL
+    lda Hit
+    bne EndGameL
+    ;lda #$5f
+    ;sta COLBAK
+    jsr CheckJoy
+    mva #>font2l chbas
+    waitRTC                   ; or waitRTC ?
+    mva #2 hscrol
+    mva #>font3l chbas
+    waitRTC                   ; or waitRTC ?
+    mva #3 hscrol
+    jsr WorldShift  ; better place (flickering)
+    mva #>font4l chbas
+    waitRTC                   ; or waitRTC ?
+    mva #4 hscrol
+    jsr Animate
+    mva #>font1l chbas
+    waitRTC                   ; or waitRTC ?
+    mva #1 hscrol
+    jmp EndLoopL
+EndGameL
     rts
 .endp
 ;-----------------------------------------------
@@ -249,6 +284,27 @@ ToScreenLoop
     tay
     jsr ShowObject
 NothingToDraw
+    inc temp_b
+    ldx temp_b
+    cpx #WORLD_LENGTH
+    bne ToScreenLoop
+    rts
+.endp
+;-----------------------------------------------
+.proc WorldToScreenL
+    jsr ClearScreen
+    ldx #0  ; start position (world)
+    stx temp_b
+    lda #40 ; start position (screen)
+    sta temp_b2
+ToScreenLoop
+    lda WorldTable,x
+    bmi NothingToDraw
+    tay
+    ldx temp_b2
+    jsr ShowObjectL
+NothingToDraw
+    dec temp_b2
     inc temp_b
     ldx temp_b
     cpx #WORLD_LENGTH
@@ -399,6 +455,39 @@ ObjectLoop
     iny
     cpy #2  ; object width
     bne ObjectLoop
+    rts
+.endp
+;-----------------------------------------------
+; Show Object on screen (left)
+; X - y position
+; Y - shape nr
+;-----------------------------------------------
+.proc ShowObjectL
+    lda ShapesTableL,y
+    sta temp_w
+    lda ShapesTableH,y
+    sta temp_w+1
+    ldy #1  ; object widrh-1
+ObjectLoop
+    lda (temp_w),y
+    bmi @+
+    sta screen+$400,x
+@   adw temp_w #2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$500,x
+@   adw temp_w #2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$600,x
+@   adw temp_w #2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$700,x
+@   sbw temp_w #6
+    inx
+    dey
+    bpl ObjectLoop
     rts
 .endp
 ;-----------------------------------------------
@@ -588,6 +677,190 @@ DinoLoop4
     iny
     cpy #5  ; dino width
     bne DinoLoop4
+    rts
+.endp
+;-----------------------------------------------
+; Show Dino (left) on screen and check collisions
+;-----------------------------------------------
+.proc ShowDinoL
+    ldx #36 ; position
+    lda DinoState
+    ora DinoWalkPhase  ; shape
+    tay
+    lda DinoShapesTableL,y
+    sta temp_w
+    lda DinoShapesTableH,y
+    sta temp_w+1
+    cpy #4  ; jump
+    beq Jump
+    cpy #5  ; jump
+    beq Jump
+    ldy #4  ;dino width-1
+DinoLoop
+    lda (temp_w),y
+    bmi @+
+    lda screen+$500,x
+    beq NotHit0b
+    lda #$5b    ; hit mark
+    sta Hit
+    bne Hit0b
+NotHit0b
+    lda (temp_w),y
+Hit0b
+    sta screen+$500,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    lda screen+$600,x
+    beq NotHit0c
+    lda #$5b    ; hit mark
+    sta Hit
+    bne Hit0c
+NotHit0c
+    lda (temp_w),y
+Hit0c
+    sta screen+$600,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$700,x
+@   sbw temp_w #10
+    inx
+    dey
+    bpl DinoLoop
+    rts
+Jump
+    ldy JumpPhase
+    lda DinoJumpTr,y
+    cmp #2
+    jeq jPhase2
+    cmp #3
+    jeq jPhase3
+    cmp #4
+    jeq jPhase4
+jPhase1
+    ldy #4  ; dinowidth-1
+DinoLoop1
+    lda (temp_w),y
+    bmi @+
+    lda screen+$400,x   ; check obstacle
+    beq NotHit1a
+    lda #$5b    ; make hit mark
+    sta Hit
+    bne Hit1a
+NotHit1a
+    lda (temp_w),y
+Hit1a
+    sta screen+$400,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    lda screen+$500,x   ; check obstacle
+    beq NotHit1b
+    lda #$5b    ; make hit mark
+    sta Hit
+    bne Hit1b
+NotHit1b
+    lda (temp_w),y
+Hit1b
+    sta screen+$500,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    lda screen+$600,x   ; check obstacle
+    beq NotHit1c
+    lda #$5b    ; make hit mark
+    sta Hit
+    bne Hit1c
+NotHit1c
+    lda (temp_w),y
+Hit1c
+    sta screen+$600,x
+@   sbw temp_w #10
+    inx
+    dey
+    bpl DinoLoop1
+    rts
+jPhase2
+    ldy #4 ; dino width-1
+DinoLoop2
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    lda screen+$400,x   ; check obstacle
+    beq NotHit2a
+    lda #$5b    ; make hit mark
+    sta Hit
+    bne Hit2a
+NotHit2a
+    lda (temp_w),y
+Hit2a
+    sta screen+$400,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    lda screen+$500,x   ; check obstacle
+    beq NotHit2b
+    lda #$5b    ; make hit mark
+    sta Hit
+    bne Hit2b
+NotHit2b
+    lda (temp_w),y
+Hit2b
+    sta screen+$500,x
+@   sbw temp_w #10
+    inx
+    dey
+    bpl DinoLoop2
+    rts
+jPhase3
+    ldy #4  ; dinowidth-1
+DinoLoop3
+    lda (temp_w),y
+    bmi @+
+    sta screen+$200,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    lda screen+$400,x   ; check obstacle
+    beq NotHit3a
+    lda #$5b    ; make hit mark
+    sta Hit
+    bne Hit3a
+NotHit3a
+    lda (temp_w),y
+Hit3a
+    sta screen+$400,x
+@   sbw temp_w #10
+    inx
+    dey
+    bpl DinoLoop3
+    rts
+jPhase4
+    ldy #4  ; dino width-1
+DinoLoop4
+    lda (temp_w),y
+    bmi @+
+    sta screen+$100,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$200,x
+@   adw temp_w #5
+    lda (temp_w),y
+    bmi @+
+    sta screen+$300,x
+@   sbw temp_w #10
+    inx
+    dey
+    bpl DinoLoop4
     rts
 .endp
 ;-----------------------------------------------
