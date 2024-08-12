@@ -85,24 +85,16 @@ EndLoop
     ;lda #$5f
     ;sta COLBAK
     jsr CheckJoy
-    ;waitRTC                   ; or waitRTC ?
-    ;key
     mva #>font2 chbas
     waitRTC                   ; or waitRTC ?
     mva #3 hscrol
-    ;waitRTC                   ; or waitRTC ?
-    ;key
     mva #>font3 chbas
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
     jsr WorldShift  ; better place (flickering)
-    ;waitRTC                   ; or waitRTC ?
-    ;key
     mva #>font4 chbas
     waitRTC                   ; or waitRTC ?
     mva #1 hscrol
-    ;waitRTC                   ; or waitRTC ?
-    ;key
     jsr Animate
     mva #>font1 chbas
     waitRTC                   ; or waitRTC ?
@@ -585,6 +577,13 @@ Down
     sta DinoState
     sta diff_level
     sta Hit
+    ; clear score
+    lda #$10
+    sta score
+    sta score+1
+    sta score+2
+    sta score+3
+    sta score+4
     rts
 .endp
 ;-----------------------------------------------

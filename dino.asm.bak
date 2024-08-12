@@ -229,27 +229,27 @@ noInsert
 .proc ScoreUp
     inc score+4
     lda score+4
-    cmp #$3a    ; 9+1 character code
+    cmp #$1a    ; 9+1 character code
     bne ScoreReady
-    lda #$30    ; 0 character code
+    lda #$10    ; 0 character code
     sta score+4
     inc score+3
     lda score+3
-    cmp #$3a    ; 9+1 character code
+    cmp #$1a    ; 9+1 character code
     bne ScoreReady
-    lda #$30    ; 0 character code
+    lda #$10    ; 0 character code
     sta score+3
     inc score+2
     lda score+2
-    cmp #$3a    ; 9+1 character code
+    cmp #$1a    ; 9+1 character code
     bne ScoreReady
-    lda #$30    ; 0 character code
+    lda #$10    ; 0 character code
     sta score+2
     inc score+1
     lda score+1
-    cmp #$3a    ; 9+1 character code
+    cmp #$1a    ; 9+1 character code
     bne ScoreReady
-    lda #$30    ; 0 character code
+    lda #$10    ; 0 character code
     sta score+1
     inc score
 ScoreReady 
