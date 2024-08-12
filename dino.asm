@@ -416,18 +416,6 @@ ObjectLoop
 DinoLoop
     lda (temp_w),y
     bmi @+
-    lda screen+$400,x   ; check obstacle
-    beq NotHit0a
-    lda #$5b    ; make hit mark
-    sta Hit
-    bne Hit0a
-NotHit0a
-    lda (temp_w),y
-Hit0a
-    sta screen+$400,x
-@   adw temp_w #5
-    lda (temp_w),y
-    bmi @+
     lda screen+$500,x
     beq NotHit0b
     lda #$5b    ; hit mark
@@ -453,7 +441,7 @@ Hit0c
     lda (temp_w),y
     bmi @+
     sta screen+$700,x
-@   sbw temp_w #15
+@   sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
@@ -471,10 +459,6 @@ Jump
 jPhase1
     ldy #0
 DinoLoop1
-    lda (temp_w),y
-    bmi @+
-    sta screen+$300,x
-@   adw temp_w #5
     lda (temp_w),y
     bmi @+
     lda screen+$400,x   ; check obstacle
@@ -510,7 +494,7 @@ NotHit1c
     lda (temp_w),y
 Hit1c
     sta screen+$600,x
-@   sbw temp_w #15
+@   sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
@@ -519,10 +503,6 @@ Hit1c
 jPhase2
     ldy #0
 DinoLoop2
-    lda (temp_w),y
-    bmi @+
-    sta screen+$200,x
-@   adw temp_w #5
     lda (temp_w),y
     bmi @+
     sta screen+$300,x
@@ -550,7 +530,7 @@ NotHit2b
     lda (temp_w),y
 Hit2b
     sta screen+$500,x
-@   sbw temp_w #15
+@   sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
@@ -559,10 +539,6 @@ Hit2b
 jPhase3
     ldy #0
 DinoLoop3
-    lda (temp_w),y
-    bmi @+
-    sta screen+$100,x
-@   adw temp_w #5
     lda (temp_w),y
     bmi @+
     sta screen+$200,x
@@ -582,7 +558,7 @@ NotHit3a
     lda (temp_w),y
 Hit3a
     sta screen+$400,x
-@   sbw temp_w #15
+@   sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
@@ -591,10 +567,6 @@ Hit3a
 jPhase4
     ldy #0
 DinoLoop4
-    lda (temp_w),y
-    bmi @+
-    sta screen,x
-@   adw temp_w #5
     lda (temp_w),y
     bmi @+
     sta screen+$100,x
@@ -606,7 +578,7 @@ DinoLoop4
     lda (temp_w),y
     bmi @+
     sta screen+$300,x
-@   sbw temp_w #15
+@   sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width

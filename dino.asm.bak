@@ -95,18 +95,18 @@ EndLoop
     ;lda #$5f
     ;sta COLBAK
     jsr CheckJoy
-    mva #>font2l chbas
+    mva #>font2 chbas
     waitRTC                   ; or waitRTC ?
     mva #3 hscrol
-    mva #>font3l chbas
+    mva #>font3 chbas
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
     jsr WorldShift  ; better place (flickering)
-    mva #>font4l chbas
+    mva #>font4 chbas
     waitRTC                   ; or waitRTC ?
     mva #1 hscrol
     jsr Animate
-    mva #>font1l chbas
+    mva #>font1 chbas
     waitRTC                   ; or waitRTC ?
     mva #4 hscrol
     jmp EndLoop
@@ -416,18 +416,6 @@ ObjectLoop
 DinoLoop
     lda (temp_w),y
     bmi @+
-    lda screen+$400,x   ; check obstacle
-    beq NotHit0a
-    lda #$5b    ; make hit mark
-    sta Hit
-    bne Hit0a
-NotHit0a
-    lda (temp_w),y
-Hit0a
-    sta screen+$400,x
-@   adw temp_w #5
-    lda (temp_w),y
-    bmi @+
     lda screen+$500,x
     beq NotHit0b
     lda #$5b    ; hit mark
@@ -453,7 +441,7 @@ Hit0c
     lda (temp_w),y
     bmi @+
     sta screen+$700,x
-@   sbw temp_w #15
+@   sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
