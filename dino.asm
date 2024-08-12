@@ -1,6 +1,6 @@
 SCR_HEIGHT = 8
 WORLD_LENGTH = 64
-DIFF_LEVELS = 16
+DIFF_LEVELS = 20
 
 ;  No internet
 ;---------------------------------------------------
@@ -17,6 +17,7 @@ swap_table=$0600    ; table for swap bytes in left characters :)
     .zpvar DinoState    .byte   ; 0/1 - walk, 2/3 - crouch, 4... - jump 
     .zpvar JumpPhase    .byte
     .zpvar Hit  .byte
+    .zpvar Level    .byte
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
@@ -332,10 +333,19 @@ Shift
     lda WorldTable+1,y
     sta WorldTable,y
     iny
-    cpy #WORLD_LENGTH-1
+    cpy #WORLD_LENGTH
     bne Shift
     lda #0  ;ground
     sta WorldTable,y
+    ; or sometimes mountain :)
+    lda RANDOM
+    and #%00011111  ; 32:1
+    bne no_mountain
+    lda #13
+    sta WorldTable-1,y
+    ora #$80
+    sta WorldTable,y
+no_mountain    
     ; now we can insert random object to world end
     
     ; check if there is enough of the gap between obstacles
@@ -359,14 +369,23 @@ insertObject
     lda RANDOM
     and #%00000001  ; insert 50/50
     beq noInsert
-    randomize 8 13  ; cactuses and hole
+    lda diff_level
+    cmp #2
+    bcs AddBirds
+NoBirds
+    randomize 8 12  ; cactuses and hole
+    bne Drawn
+AddBirds
+    randomize 7 12  ; cactuses and hole
+Drawn
+    cmp #7  ; if bird then selec one shape from 3
+    bne NoBird
+    randomize 2 7
+    and #%11111110
+NoBird
     sta WorldTable+WORLD_LENGTH-2
     ora #$80
     sta WorldTable+WORLD_LENGTH-1
-    inc diff_level
-    
-    
-    
 noInsert    
     rts
 .endp
@@ -384,6 +403,8 @@ noInsert
     bne ScoreReady
     lda #$10    ; 0 character code
     sta score+3
+    ; if score gets next 100 - level up
+    inc diff_level
     inc score+2
     lda score+2
     cmp #$1a    ; 9+1 character code

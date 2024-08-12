@@ -142,7 +142,7 @@ ShapesTableH
     .by >ground_1
     .by >ground_2
 diff_object_gap ; min distance between obstacles by difficulty level
-    :DIFF_LEVELS .by 20-#
+    .by 18,17,15,13,11,9,8,7,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5
 ;----------vars----------
 diff_level  .ds 1
 DinoJumpTr  .by 1,2,3,4,4,3,2,1
