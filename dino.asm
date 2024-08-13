@@ -312,9 +312,10 @@ SwapLoop
     ldy #7
 @   lda font1+$2e0,y    ; cloud symbol ($5c)
     sta PMgraph+$400+$78,y
-    sta PMgraph+$500+$80,y
-    sta PMgraph+$600+$78,y
     sta PMgraph+$700+$80,y
+    lda font1l+$2e0,y
+    sta PMgraph+$600+$78,y
+    sta PMgraph+$500+$80,y
     dey
     bpl @-
     ;hide PM
