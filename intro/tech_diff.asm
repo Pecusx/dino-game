@@ -21,6 +21,7 @@
     mva #0 COLOR2
     sta COLBAK
     mva #15 COLOR1
+    jsr wait_for_releasing_keyz
     
 leet_anim
     ; test for going further
@@ -71,7 +72,11 @@ next_letter
     jmp @-
 
 leet_end
-    ; wait for releasing keyz
+    jsr wait_for_releasing_keyz
+    rts
+    
+
+.proc wait_for_releasing_keyz
 @   lda CONSOL
     cmp #7
     bne @-
@@ -83,8 +88,9 @@ leet_end
     bne @-
 @   lda TRIG0
     beq @-
-
     rts
+.endp
+
 DL_pre
     :8 .by SKIP8
     .by LMS+MODE2
