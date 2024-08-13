@@ -483,7 +483,11 @@ noInsert
     sta score+3
     ; if score gets next 100 - level up
     inc diff_level
-    inc score+2
+    lda diff_level
+    cmp #DIFF_LEVELS+1
+    bne @+
+    dec diff_level
+@   inc score+2
     lda score+2
     cmp #"9"+1  ; 9+1 character code
     bne ScoreReady
