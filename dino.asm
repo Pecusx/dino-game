@@ -42,6 +42,8 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 ;---------------------------------------------------
 
     org $2000
+PMgraph
+    org PMGraph+$800    ; P/M graphics for clouds
 ;---------------------------------------------------
 ; 4 charsets for fine scroll
 font1
@@ -54,13 +56,15 @@ font4 = font3+$400
     ins 'artwork/dino4.fnt'  ; 4 charset
 ; display list
 GameDL
-    :13 .byte SKIP8   ; empty lines
+    :8 .byte SKIP8   ; empty lines
 
     .byte MODE2+LMS   ; gr.8+LMS
 status_line_addr
-    .word status_line_r
+    .word status_line_r    
+    :4 .byte SKIP8
+    .byte MODE2
 
-    .byte SKIP8 ; empty lines
+    .byte SKIP8,SKIP8 ; empty lines
 
     .rept SCR_HEIGHT, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
@@ -70,15 +74,37 @@ line:1_addr
     .byte JVB   
     .word GameDL
 status_line_r
-    dta d"  l-hi 00000  r-hi 00000         00000  "
+    dta d"             "
+    .byte $5d   ; "N" letter
+    dta               d"o internet!               "
+    dta d"  "
+    .byte $5e   ; "L" letter
+    dta    d"-"
+    .byte $7e,$7f   ; "HI" letters
+    dta       d" 00000  "
+    .byte $5f   ; "R" letter
+    dta                d"-"
+    .byte $7e,$7f   ; "HI" letters
+    dta                  d" 00000         00000  "
 status_line_l
-    dta d"  00000         00000 ih-r  00000 ih-l  "
-score=status_line_r+33
-rhiscore=status_line_r+19
-lhiscore=status_line_r+7
-scorel=status_line_l+2
-rhiscorel=status_line_l+16
-lhiscorel=status_line_l+28
+    dta d"             !tenretni o"
+    .byte $5d   ; "N" letter
+    dta                          d"               "
+    dta d"  00000         00000 "
+    .byte $7f,$7e   ; "IH" letters
+    dta                         d"-"
+    .byte $5f   ; "R" letter
+    dta                           d"  00000 "
+    .byte $7f,$7e   ; "IH" letters
+    dta                                     d"-"
+    .byte $5e   ; "L" letter
+    dta                                       d"  "
+score=status_line_r+33+40
+rhiscore=status_line_r+19+40
+lhiscore=status_line_r+7+40
+scorel=status_line_l+2+40
+rhiscorel=status_line_l+16+40
+lhiscorel=status_line_l+28+40
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
@@ -87,8 +113,10 @@ WorldTable
 FirstSTART
     jsr ClearScreen
     jsr GenerateCharsets
-    jsr SetGameScreen
+    jsr GenerateClouds
     jsr FadeColorsIN
+    AnyKey
+    jsr SetGameScreen
 NewGame    
     jsr SetStatusToR
     jsr SetStart        
@@ -122,6 +150,7 @@ EndLoopR
     waitRTC                   ; or waitRTC ?
     mva #2 hscrol
     jsr WorldShift  ; better place (flickering)
+    jsr CloudsR
     mva #>font4 chbas
     waitRTC                   ; or waitRTC ?
     mva #1 hscrol
@@ -152,6 +181,7 @@ EndLoopL
     waitRTC                   ; or waitRTC ?
     mva #3 hscrol
     jsr WorldShift  ; better place (flickering)
+    jsr CloudsL
     mva #>font4l chbas
     waitRTC                   ; or waitRTC ?
     mva #4 hscrol
@@ -259,6 +289,35 @@ SwapLoop
     sta font4l+$300,y
     iny
     bne SwapLoop    
+    rts
+.endp
+;-----------------------------------------------
+.proc GenerateClouds
+    ; first clear PMgraphics memory
+    ldy #$00
+    tya
+    ;hide PM
+    sta CloudHpos
+    sta CloudHpos+1
+    sta CloudHpos+2
+    sta CloudHpos+3
+@   sta PMgraph+$300,y
+    sta PMgraph+$400,y
+    sta PMgraph+$500,y
+    sta PMgraph+$600,y
+    sta PMgraph+$700,y
+    iny
+    bne @-
+    ; now make 4 clouds
+    ldy #7
+@   lda font1+$2e0,y    ; cloud symbol ($5c)
+    sta PMgraph+$400+$78,y
+    sta PMgraph+$500+$80,y
+    sta PMgraph+$600+$78,y
+    sta PMgraph+$700+$80,y
+    dey
+    bpl @-
+    ;hide PM
     rts
 .endp
 ;-----------------------------------------------
@@ -389,6 +448,26 @@ noInsert
     rts
 .endp
 ;-----------------------------------------------
+.proc CloudsL
+    inc CloudHpos
+    inc CloudHpos+1
+    inc CloudHpos+2
+    inc CloudHpos+3
+    inc CloudHpos+2
+    inc CloudHpos+3
+    rts
+.endp
+;-----------------------------------------------
+.proc CloudsR
+    dec CloudHpos
+    dec CloudHpos+1
+    dec CloudHpos+2
+    dec CloudHpos+3
+    dec CloudHpos+2
+    dec CloudHpos+3
+    rts
+.endp
+;-----------------------------------------------
 .proc ScoreUp
     inc score+4
     lda score+4
@@ -456,13 +535,20 @@ NoBird
     cmp #JumpLen  ; max jump phase
     beq EndJump
     inc JumpPhase
+NoJump
+    ; clouds
+Clouds
+    ldy #3
+@   lda CloudHpos,y
+    sta HPOSP0,y
+    dey
+    bpl @-
     rts
 EndJump
     lda #0
     sta JumpPhase
     sta DinoState
-NoJump
-    rts
+    beq NoJump
 .endp
 ;---------------------------------------------------
 .proc SetStatusToL
@@ -950,6 +1036,13 @@ Down
     sta scorel,x
     dex
     bpl @-
+    ;randomize clouds
+    ldy #3
+@   lda RANDOM
+    sta CloudHpos,y
+    dey
+    bpl @-
+    jsr Animate.Clouds
     rts
 .endp
 ;-----------------------------------------------
@@ -1060,8 +1153,8 @@ FadeColor
     cpy #$10
     bne FadeColor
     lda #$0f
-    sta COLOR2
     sta COLOR4
+    sta COLOR2
     rts
 .endp
 ;-----------------------------------------------
@@ -1082,8 +1175,25 @@ FadeColor
 .proc SetGameScreen
     mwa #GameDL dlptrs
     lda #@dmactl(standard|dma|players|missiles|lineX1) ; normal screen width, DL on, P/M on
+    lda #%00111110
     sta dmactls
     mva #>font1 chbas
+    mva #>PMgraph PMBASE
+    lda #%00011111    ; P/M on
+    sta GRACTL
+    lda #$0a
+    sta COLPM0
+    sta COLPM1
+    sta COLPM2
+    sta COLPM3
+    lda #90
+    sta HPOSP0
+    lda #70
+    sta HPOSP1
+    lda #60
+    sta HPOSP2
+    lda #80
+    sta HPOSP3 
     rts
 .endp
 ;-----------------------------------------------

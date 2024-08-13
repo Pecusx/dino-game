@@ -144,6 +144,7 @@ ShapesTableH
 diff_object_gap ; min distance between obstacles by difficulty level
     .by 18,17,15,13,11,9,8,7,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5
 ;----------vars----------
+CloudHpos   .by 0,0,0,0
 diff_level  .ds 1
 DinoJumpTr  .by 1,2,3,4,4,3,2,1
 JumpLen = 7
