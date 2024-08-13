@@ -105,6 +105,14 @@ lhiscore=status_line_r+7+40
 scorel=status_line_l+2+40
 rhiscorel=status_line_l+16+40
 lhiscorel=status_line_l+28+40
+game_over_string
+    .byte $60   ; "G" letter
+    dta d" a m e  "
+    .byte $7b   ; "O" letter
+    dta d" v e r"
+repeat_symbol
+    .byte $1c, $1e
+    .byte $7c, $7d
 ;---------------------------------------------------
 ; World table without dino
 WorldTable
@@ -121,11 +129,13 @@ NewGame
     jsr SetStatusToR
     jsr SetStart        
     jsr GameR
+    jsr GameOverR
     AnyKey
     jsr HiScoreR
     jsr SetStatusToL
     jsr SetStart        
     jsr GameL
+    jsr GameOverL
     AnyKey
     jsr HiScoreL   
     jmp NewGame
@@ -191,6 +201,46 @@ EndLoopL
     mva #1 hscrol
     jmp EndLoopL
 EndGameL
+    rts
+.endp
+;-----------------------------------------------
+.proc GameOverR
+    ; text
+    ldy #15
+@   lda game_over_string,y
+    sta screen+$100+15,y
+    dey
+    bpl @-
+    ; symbol
+    lda repeat_symbol
+    sta screen+$500+22
+    lda repeat_symbol+1
+    sta screen+$500+23
+    lda repeat_symbol+2
+    sta screen+$600+22
+    lda repeat_symbol+3
+    sta screen+$600+23
+    rts
+.endp
+;-----------------------------------------------
+.proc GameOverL
+    ; text
+    ldy #15
+    ldx #0
+@   lda game_over_string,y
+    sta screen+$100+15,x
+    inx
+    dey
+    bpl @-
+    ; symbol
+    lda repeat_symbol
+    sta screen+$500+23
+    lda repeat_symbol+1
+    sta screen+$500+22
+    lda repeat_symbol+2
+    sta screen+$600+23
+    lda repeat_symbol+3
+    sta screen+$600+22
     rts
 .endp
 ;-----------------------------------------------
