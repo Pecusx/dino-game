@@ -115,7 +115,7 @@ FirstSTART
     jsr GenerateCharsets
     jsr GenerateClouds
     jsr FadeColorsIN
-    AnyKey
+    ;AnyKey
     jsr SetGameScreen
 NewGame    
     jsr SetStatusToR
