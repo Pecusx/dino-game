@@ -62,9 +62,9 @@ GameDL
 status_line_addr
     .word status_line_r    
     :4 .byte SKIP8
-    .byte MODE2+DLII
+    .byte MODE2
 
-    .byte SKIP8,SKIP8+DLII ; empty lines
+    .byte SKIP8,SKIP8 ; empty lines
 
     .rept SCR_HEIGHT, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
@@ -431,10 +431,10 @@ insertObject
     cmp #2
     bcs AddBirds
 NoBirds
-    randomize 8 12  ; cactuses and hole
+    randomize 8 12  ; cactuses
     bne Drawn
 AddBirds
-    randomize 7 12  ; cactuses and hole
+    randomize 7 10  ; bigger cactuses and birds
 Drawn
     cmp #7  ; if bird then select one shape from 3
     bne NoBird
@@ -1173,20 +1173,19 @@ FadeColor
 .endp
 ;-----------------------------------------------
 .proc SetGameScreen
-    SetDLI CloudsDLI     ; clouds on grey
     mwa #GameDL dlptrs
     lda #@dmactl(standard|dma|players|missiles|lineX1) ; normal screen width, DL on, P/M on
     lda #%00111110
     sta dmactls
     mva #>font1 chbas
     mva #>PMgraph PMBASE
-    lda #%00011111    ; P/M on
+    lda #%00000010    ; P/M on
     sta GRACTL
-    lda #$0a
-    sta COLPM0
-    sta COLPM1
-    sta COLPM2
-    sta COLPM3
+    lda #$0c
+    sta PCOLR0
+    sta PCOLR1
+    sta PCOLR2
+    sta PCOLR3
     lda #90
     sta HPOSP0
     lda #70
@@ -1239,39 +1238,6 @@ pressed
 @   lda TRIG0
     beq @-
     rts   
-.endp
-;--------------------------------------------------
-.proc CloudsDLI
-    pha
-    lda VCOUNT
-    sta $500
-    cmp #$3f
-    bcc other
-    sta WSYNC
-    lda COLOR1
-    sta COLPF1
-    pla
-    rti
-other
-    lda #$a
-    sta COLPF1
-    pla
-    rti
-.endp
-;--------------------------------------------------
-.macro SetDLI
-;    SetDLI #WORD
-;    Initialises Display List Interrupts
-         LDY # <:1
-         LDX # >:1
-         jsr _SetDLIproc
-.endm
-.proc _SetDLIproc
-    LDA #$C0
-    STY VDSLST
-    STX VDSLST+1
-    STA NMIEN
-    rts
 .endp
 ;--------------------------------------------------
     icl 'artwork/shapes.asm'

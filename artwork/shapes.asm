@@ -118,10 +118,10 @@ ShapesTableL
     .by <bird_1a
     .by <bird_2
     .by <bird_2a
-    .by <cactus_0
-    .by <cactus_1
     .by <cactus_2
     .by <cactus_3
+    .by <cactus_0
+    .by <cactus_1
     .by <cactus_4
     .by <ground_1
     .by <ground_2
@@ -134,10 +134,10 @@ ShapesTableH
     .by >bird_1a
     .by >bird_2
     .by >bird_2a
-    .by >cactus_0
-    .by >cactus_1
     .by >cactus_2
     .by >cactus_3
+    .by >cactus_0
+    .by >cactus_1
     .by >cactus_4
     .by >ground_1
     .by >ground_2
