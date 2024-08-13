@@ -85,6 +85,7 @@ WorldTable
     :WORLD_LENGTH+1 .byte 0 ; ground
 ;---------------------------------------------------
 FirstSTART
+    jsr ClearScreen
     jsr GenerateCharsets
     jsr SetGameScreen
     jsr FadeColorsIN
@@ -92,12 +93,12 @@ NewGame
     jsr SetStatusToR
     jsr SetStart        
     jsr GameR
-    key
+    AnyKey
     jsr HiScoreR
     jsr SetStatusToL
     jsr SetStart        
     jsr GameL
-    key
+    AnyKey
     jsr HiScoreL   
     jmp NewGame
     rts
@@ -273,13 +274,14 @@ SwapLoop
     ldy #44 ; visible screen len
     lda #0
 ClearLoop
-    sta screen+$700,y
-    sta screen+$600,y
-    sta screen+$500,y
-    sta screen+$400,y
-    sta screen+$300,y
-    sta screen+$200,y
-    sta screen+$100,y
+    sta screen+$0700,y
+    sta screen+$0600,y
+    sta screen+$0500,y
+    sta screen+$0400,y
+    sta screen+$0300,y
+    sta screen+$0200,y
+    sta screen+$0100,y
+    sta screen+$0000,y
     dey
     bne ClearLoop
     rts
@@ -1083,6 +1085,37 @@ FadeColor
     sta dmactls
     mva #>font1 chbas
     rts
+.endp
+;-----------------------------------------------
+.proc AnyKey
+    ; wait for releasing keyz
+@   lda CONSOL
+    cmp #7
+    bne @-
+     ; check keyboard
+@   lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq @-
+    cmp #$ff
+    bne @-
+@   lda TRIG0
+    beq @-
+
+    ; test for going further
+@   lda CONSOL
+    cmp #7
+    bne pressed
+    ; check keyboard
+    lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq pressed
+    cmp #$ff
+    bne pressed
+    lda TRIG0
+    beq pressed
+    jmp @-
+pressed
+    rts   
 .endp
 ;--------------------------------------------------
     icl 'artwork/shapes.asm'

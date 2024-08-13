@@ -27,6 +27,16 @@ leet_anim
     lda CONSOL
     cmp #7
     bne leet_end
+     ; check keyboard
+    lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq leet_end
+    cmp #$ff
+    bne leet_end
+    lda TRIG0
+    beq leet_end   
+ 
+ 
     mwa #pre_screen temp_w
     mwa #leet_screen temp_w3
     ldy #0
@@ -39,6 +49,7 @@ leet_anim
     cmp #"z"
     bcs next_letter
     ;letter is leetable
+    beq next_letter
     sec
     sbc #"a"
     tay     ;save the letter
@@ -60,6 +71,18 @@ next_letter
     jmp @-
 
 leet_end
+    ; wait for releasing keyz
+@   lda CONSOL
+    cmp #7
+    bne @-
+     ; check keyboard
+@   lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq @-
+    cmp #$ff
+    bne @-
+@   lda TRIG0
+    beq @-
 
     rts
 DL_pre
@@ -90,10 +113,9 @@ leet_speek1
 leet_speek2
     dta "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 leet_speek3
-    dta "4&[]eF9-|jk_mn0p@r57uvw*y2"
+    dta "4&[)eF9-|jk_mn0p@r57uvw*y2"
 leet_speek4
-    ;dta "^b([E                     "
-    dta "^b(]",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"s",$57,"uvwxyz"
+    dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxyz"
 
 leet_speeks_l
     .by <leet_speek1
@@ -158,9 +180,22 @@ please_wait_loop
     sta AUDC2
     sta AUDC3
     ;sta AUDC4
-    sta wsync
-    sta wsync
-    sta wsync
+    sta wsync ;------------
+       ; test for going further
+    lda CONSOL
+    cmp #7
+    bne exit_tech_diff
+     ; check keyboard
+    lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq exit_tech_diff
+    cmp #$ff
+    bne exit_tech_diff
+    sta wsync ;------------
+    lda TRIG0
+    beq exit_tech_diff   
+    sta wsync ;------------
+
     tya
     and #$0F
     ora #$10
@@ -182,7 +217,28 @@ please_wait_loop
     cpx #13
     sne:ldx #0
     jmp please_wait_loop
- 
+
+exit_tech_diff
+    ; wait for releasing keyz
+@   lda CONSOL
+    cmp #7
+    bne @-
+     ; check keyboard
+@   lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq @-
+    cmp #$ff
+    bne @-
+@   lda TRIG0
+    beq @-
+    
+;
+    lda #$40
+    sta $d40e   ; NMI On 
+    cli         ; IRQ on
+    mva #0 DMACTLS
+    sta dmactl
+    rts 
  
 sample1
     ins 'wait1.wav.bin'
