@@ -62,9 +62,9 @@ GameDL
 status_line_addr
     .word status_line_r    
     :4 .byte SKIP8
-    .byte MODE2
+    .byte MODE2+DLII
 
-    .byte SKIP8,SKIP8 ; empty lines
+    .byte SKIP8,SKIP8+DLII ; empty lines
 
     .rept SCR_HEIGHT, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
@@ -1173,6 +1173,7 @@ FadeColor
 .endp
 ;-----------------------------------------------
 .proc SetGameScreen
+    SetDLI CloudsDLI     ; clouds on grey
     mwa #GameDL dlptrs
     lda #@dmactl(standard|dma|players|missiles|lineX1) ; normal screen width, DL on, P/M on
     lda #%00111110
@@ -1225,7 +1226,52 @@ FadeColor
     beq pressed
     jmp @-
 pressed
+    ; wait for releasing keyz
+@   lda CONSOL
+    cmp #7
+    bne @-
+     ; check keyboard
+@   lda SKSTAT
+    cmp #$f7    ; SHIFT
+    beq @-
+    cmp #$ff
+    bne @-
+@   lda TRIG0
+    beq @-
     rts   
+.endp
+;--------------------------------------------------
+.proc CloudsDLI
+    pha
+    lda VCOUNT
+    sta $500
+    cmp #$3f
+    bcc other
+    sta WSYNC
+    lda COLOR1
+    sta COLPF1
+    pla
+    rti
+other
+    lda #$a
+    sta COLPF1
+    pla
+    rti
+.endp
+;--------------------------------------------------
+.macro SetDLI
+;    SetDLI #WORD
+;    Initialises Display List Interrupts
+         LDY # <:1
+         LDX # >:1
+         jsr _SetDLIproc
+.endm
+.proc _SetDLIproc
+    LDA #$C0
+    STY VDSLST
+    STX VDSLST+1
+    STA NMIEN
+    rts
 .endp
 ;--------------------------------------------------
     icl 'artwork/shapes.asm'
