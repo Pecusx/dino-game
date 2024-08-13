@@ -1,7 +1,13 @@
 SCR_HEIGHT = 8
 WORLD_LENGTH = 64
 DIFF_LEVELS = 20
-
+.IFNDEF ALONE
+    .def ALONE = 1 ; standalone version
+.ENDIF
+.IFNDEF TARGET
+    .def TARGET = 800 ; 5200
+.ENDIF
+;---------------------------------------------------
 ;  No internet
 ;---------------------------------------------------
     OPT r+
@@ -10,27 +16,29 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 
 ;---------------------------------------------------
 ; Zpage variables
-    .zpvar temp_w   .word = $80
-    .zpvar temp_b   .byte
-    .zpvar temp_b2   .byte
+    .zpvar temp_w           .word = $80
+    .zpvar temp_b           .byte
+    .zpvar temp_b2          .byte
     .zpvar DinoWalkPhase    .byte
-    .zpvar DinoState    .byte   ; 0/1 - walk, 2/3 - crouch, 4... - jump 
-    .zpvar JumpPhase    .byte
-    .zpvar Hit  .byte
-    .zpvar Level    .byte
+    .zpvar DinoState        .byte   ; 0/1 - walk, 2/3 - crouch, 4... - jump 
+    .zpvar JumpPhase        .byte
+    .zpvar Hit              .byte
+    .zpvar Level            .byte
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
 ;---------------------------------------------------
-    ; dark screean and BASIC off
-    ORG $2000
-    mva #0 dmactls             ; dark screen
-    mva #$ff portb
-    ; and wait one frame :)
-    waitRTC                   ; or waitRTC ?
-    mva #$ff portb        ; BASIC off
-    rts
-    ini $2000
+    .IF ALONE =1
+        ; dark screean and BASIC off
+        ORG $2000
+        mva #0 dmactls             ; dark screen
+        mva #$ff portb
+        ; and wait one frame :)
+        waitRTC                   ; or waitRTC ?
+        mva #$ff portb        ; BASIC off
+        rts
+        ini $2000
+    .ENDIF
 ;---------------------------------------------------
 
     org $2000
@@ -44,17 +52,6 @@ font3 = font2+$400
     ins 'artwork/dino3.fnt'  ; 3 charset
 font4 = font3+$400
     ins 'artwork/dino4.fnt'  ; 4 charset
-; and 4 charsets for left game :)
-font1l=font4+$400
-font2l=font1l+$400
-font3l=font2l+$400
-font4l=font3l+$400
-
-    org font4l+$400
-; screen data
-; SCR_HEIGHT lines 256bytes each
-screen
-    .ds $100*SCR_HEIGHT
 ; display list
 GameDL
     :13 .byte SKIP8   ; empty lines
@@ -298,8 +295,7 @@ ToScreenLoop
     tay
     jsr ShowObject
 NothingToDraw
-    inc temp_b
-    ldx temp_b
+    inc:ldx temp_b
     cpx #WORLD_LENGTH
     bne ToScreenLoop
     rts
@@ -319,8 +315,7 @@ ToScreenLoop
     jsr ShowObjectL
 NothingToDraw
     dec temp_b2
-    inc temp_b
-    ldx temp_b
+    inc:ldx temp_b
     cpx #WORLD_LENGTH
     bne ToScreenLoop
     rts
@@ -380,7 +375,7 @@ NoBirds
 AddBirds
     randomize 7 12  ; cactuses and hole
 Drawn
-    cmp #7  ; if bird then selec one shape from 3
+    cmp #7  ; if bird then select one shape from 3
     bne NoBird
     randomize 2 7
     and #%11111110
@@ -395,29 +390,29 @@ noInsert
 .proc ScoreUp
     inc score+4
     lda score+4
-    cmp #$1a    ; 9+1 character code
+    cmp #"9"+1  ; 9+1 character code
     bne ScoreReady
-    lda #$10    ; 0 character code
+    lda #"0"    ; 0 character code
     sta score+4
     inc score+3
     lda score+3
-    cmp #$1a    ; 9+1 character code
+    cmp #"9"+1  ; 9+1 character code
     bne ScoreReady
-    lda #$10    ; 0 character code
+    lda #"0"    ; 0 character code
     sta score+3
     ; if score gets next 100 - level up
     inc diff_level
     inc score+2
     lda score+2
-    cmp #$1a    ; 9+1 character code
+    cmp #"9"+1  ; 9+1 character code
     bne ScoreReady
-    lda #$10    ; 0 character code
+    lda #"0"    ; 0 character code
     sta score+2
     inc score+1
     lda score+1
-    cmp #$1a    ; 9+1 character code
+    cmp #"9"+1  ; 9+1 character code
     bne ScoreReady
-    lda #$10    ; 0 character code
+    lda #"0"    ; 0 character code
     sta score+1
     inc score
 ScoreReady
@@ -496,21 +491,17 @@ NoJump
     ldy #0
 ObjectLoop
     lda (temp_w),y
-    bmi @+
-    sta screen+$400,x
-@   adw temp_w #2
+    smi:sta screen+$400,x
+    adw temp_w #2
     lda (temp_w),y
-    bmi @+
-    sta screen+$500,x
-@   adw temp_w #2
+    smi:sta screen+$500,x
+    adw temp_w #2
     lda (temp_w),y
-    bmi @+
-    sta screen+$600,x
-@   adw temp_w #2
+    smi:sta screen+$600,x
+    adw temp_w #2
     lda (temp_w),y
-    bmi @+
-    sta screen+$700,x
-@   sbw temp_w #6
+    smi:sta screen+$700,x
+    sbw temp_w #6
     inx
     iny
     cpy #2  ; object width
@@ -530,21 +521,17 @@ ObjectLoop
     ldy #1  ; object widrh-1
 ObjectLoop
     lda (temp_w),y
-    bmi @+
-    sta screen+$400,x
-@   adw temp_w #2
+    smi:sta screen+$400,x
+    adw temp_w #2
     lda (temp_w),y
-    bmi @+
-    sta screen+$500,x
-@   adw temp_w #2
+    smi:sta screen+$500,x
+    adw temp_w #2
     lda (temp_w),y
-    bmi @+
-    sta screen+$600,x
-@   adw temp_w #2
+    smi:sta screen+$600,x
+    adw temp_w #2
     lda (temp_w),y
-    bmi @+
-    sta screen+$700,x
-@   sbw temp_w #6
+    smi:sta screen+$700,x
+    sbw temp_w #6
     inx
     dey
     bpl ObjectLoop
@@ -593,9 +580,8 @@ Hit0c
     sta screen+$600,x
 @   adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$700,x
-@   sbw temp_w #10
+    smi:sta screen+$700,x
+    sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
@@ -658,9 +644,8 @@ jPhase2
     ldy #0
 DinoLoop2
     lda (temp_w),y
-    bmi @+
-    sta screen+$300,x
-@   adw temp_w #5
+    smi:sta screen+$300,x
+    adw temp_w #5
     lda (temp_w),y
     bmi @+
     lda screen+$400,x   ; check obstacle
@@ -722,17 +707,14 @@ jPhase4
     ldy #0
 DinoLoop4
     lda (temp_w),y
-    bmi @+
-    sta screen+$100,x
-@   adw temp_w #5
+    smi:sta screen+$100,x
+    adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$200,x
-@   adw temp_w #5
+    smi:sta screen+$200,x
+    adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$300,x
-@   sbw temp_w #10
+    smi:sta screen+$300,x
+    sbw temp_w #10
     inx
     iny
     cpy #5  ; dino width
@@ -782,9 +764,8 @@ Hit0c
     sta screen+$600,x
 @   adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$700,x
-@   sbw temp_w #10
+    smi:sta screen+$700,x
+    sbw temp_w #10
     inx
     dey
     bpl DinoLoop
@@ -845,9 +826,8 @@ jPhase2
     ldy #4 ; dino width-1
 DinoLoop2
     lda (temp_w),y
-    bmi @+
-    sta screen+$300,x
-@   adw temp_w #5
+    smi:sta screen+$300,x
+    adw temp_w #5
     lda (temp_w),y
     bmi @+
     lda screen+$400,x   ; check obstacle
@@ -880,13 +860,11 @@ jPhase3
     ldy #4  ; dinowidth-1
 DinoLoop3
     lda (temp_w),y
-    bmi @+
-    sta screen+$200,x
-@   adw temp_w #5
+    smi:sta screen+$200,x
+    adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$300,x
-@   adw temp_w #5
+    smi:sta screen+$300,x
+    adw temp_w #5
     lda (temp_w),y
     bmi @+
     lda screen+$400,x   ; check obstacle
@@ -907,17 +885,14 @@ jPhase4
     ldy #4  ; dino width-1
 DinoLoop4
     lda (temp_w),y
-    bmi @+
-    sta screen+$100,x
-@   adw temp_w #5
+    smi:sta screen+$100,x
+    adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$200,x
-@   adw temp_w #5
+    smi:sta screen+$200,x
+    adw temp_w #5
     lda (temp_w),y
-    bmi @+
-    sta screen+$300,x
-@   sbw temp_w #10
+    smi:sta screen+$300,x
+    sbw temp_w #10
     inx
     dey
     bpl DinoLoop4
@@ -967,17 +942,12 @@ Down
     sta diff_level
     sta Hit
     ; clear score
-    lda #$10
-    sta score
-    sta score+1
-    sta score+2
-    sta score+3
-    sta score+4
-    sta scorel
-    sta scorel+1
-    sta scorel+2
-    sta scorel+3
-    sta scorel+4
+    lda #"0"
+    ldx #4
+@   sta score,x
+    sta scorel,x
+    dex
+    bpl @-
     rts
 .endp
 ;-----------------------------------------------
@@ -1109,7 +1079,7 @@ FadeColor
 ;-----------------------------------------------
 .proc SetGameScreen
     mwa #GameDL dlptrs
-    lda #%00111110  ; normal screen width, DL on, P/M on
+    lda #@dmactl(standard|dma|players|missiles|lineX1) ; normal screen width, DL on, P/M on
     sta dmactls
     mva #>font1 chbas
     rts
@@ -1117,5 +1087,19 @@ FadeColor
 ;--------------------------------------------------
     icl 'artwork/shapes.asm'
 ;--------------------------------------------------
+    .ALIGN $400
+; and 4 charsets for left game :)
+font1l
+    .ds $400
+font2l
+    .ds $400
+font3l
+    .ds $400
+font4l
+    .ds $400
+; screen data
+; SCR_HEIGHT lines 256bytes each
+screen
+    .ds $100*SCR_HEIGHT
 
     run FirstSTART

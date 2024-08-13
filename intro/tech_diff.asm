@@ -6,22 +6,111 @@
 ; Zpage variables
     .zpvar temp_w   .word = $80
     .zpvar temp_b   .byte
+    .zpvar temp_w2  .word
+    .zpvar temp_w3  .word
 ;---------------------------------------------------
     icl '../lib/ATARISYS.ASM'
     icl '../lib/MACRO.ASM'
 ;---------------------------------------------------
-    ; dark screean and BASIC off
+    ; BASIC off
     ORG $2000
-    mva #0 dmactls             ; dark screen
     mva #$ff portb
-    ; and wait one frame :)
-    seq:wait                   ; or waitRTC ?
-    mva #$ff portb        ; BASIC off
+    mwa #DL_pre dlptrs
+    lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
+    sta dmactls
+    mva #0 COLOR2
+    sta COLBAK
+    mva #15 COLOR1
+    
+leet_anim
+    ; test for going further
+    lda CONSOL
+    cmp #7
+    bne leet_end
+    mwa #pre_screen temp_w
+    mwa #leet_screen temp_w3
+    ldy #0
+@
+    lda (temp_w),y
+    beq next_letter     ; ignore zeroes
+    ;is the letter leetable?
+    cmp #"a"
+    bcc next_letter
+    cmp #"z"
+    bcs next_letter
+    ;letter is leetable
+    sec
+    sbc #"a"
+    tay     ;save the letter
+    lda RANDOM
+    and #%00000011   ; 0-3
+    tax
+    lda leet_speeks_l,x
+    sta temp_w2
+    lda leet_speeks_h,x
+    sta temp_w2+1
+    lda (temp_w2),y
+next_letter
+    ldy #0
+    sta (temp_w3),y
+    inw temp_w
+    inw temp_w3
+    cpw temp_w #pre_screen_end
+    beq leet_anim
+    jmp @-
+
+leet_end
+
     rts
+DL_pre
+    :8 .by SKIP8
+    .by LMS+MODE2
+    .wo leet_screen
+    .by SKIP1, MODE2
+    .by SKIP8
+    .by SKIP1, MODE2
+    .by SKIP8
+    :6 .by SKIP1, MODE2
+    .by JVB
+    .wo DL_pre
+pre_screen
+    ;    01234567890123456789012345678901"
+    dta "this little game was created in "
+    dta " four evenings before SV2K24SE  "
+    dta "sorry for technical difficulties"
+    dta "code:                           "
+    dta "        pecus & pirx            "
+    dta "sound:                          "
+    dta "        alex, jochen hippel     "
+    dta "gfx:                            "
+    dta "        alphabet, inc.          "
+pre_screen_end
+leet_speek1
+    dta "abcdefghijklmnopqrstuvwxyz"
+leet_speek2
+    dta "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+leet_speek3
+    dta "4&[]eF9-|jk_mn0p@r57uvw*y2"
+leet_speek4
+    ;dta "^b([E                     "
+    dta "^b(]",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"s",$57,"uvwxyz"
+
+leet_speeks_l
+    .by <leet_speek1
+    .by <leet_speek2
+    .by <leet_speek3
+    .by <leet_speek4
+leet_speeks_h
+    .by >leet_speek1
+    .by >leet_speek2
+    .by >leet_speek3
+    .by >leet_speek4
+leet_screen 
+    .ds 32*9
     ini $2000
 ;---------------------------------------------------
 
-    org $2000
+    org $3000
 screen
     ins 'difficulties.bmp',+62
 DL
@@ -34,7 +123,7 @@ DL
     
 start
     mwa #DL dlptrs
-    lda #%00111110  ; normal screen width, DL on, P/M on
+    lda #@dmactl(standard|dma|players|missiles|lineX1)  ; normal screen width, DL on, P/M on
     sta dmactls
     mva #0 COLOR2
     sta COLBAK
@@ -42,8 +131,8 @@ start
     POKEY_INIT
     pause 3
     lda #0
-    sta $d40e   ; wylaczamy NMI 
-    sei         ; oraz IRQ
+    sta $d40e   ; NMI OFF 
+    sei         ; IRQ OFF
     
     
     ;-----playa-da-sampla-----
@@ -69,7 +158,9 @@ please_wait_loop
     sta AUDC2
     sta AUDC3
     ;sta AUDC4
-    :3 sta wsync
+    sta wsync
+    sta wsync
+    sta wsync
     tya
     and #$0F
     ora #$10
@@ -168,5 +259,5 @@ samples_end_h
     .by >sample_end4
     .by >sample_end2
     .by >sample_end6
-
+finito
     ini start
