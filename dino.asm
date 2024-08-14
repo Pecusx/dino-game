@@ -1052,6 +1052,8 @@ DinoLoop4
     lda STICK0
     and #%00000001  ; up
     beq Up
+    lda TRIG0   ; Fire = Up
+    beq Up
     ; check keyboard
     lda SKSTAT
     cmp #$f7    ; SHIFT
