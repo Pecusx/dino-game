@@ -126,21 +126,26 @@ FirstSTART
     jsr ClearScreen
     jsr GenerateCharsets
     jsr GenerateClouds
-    jsr FadeColorsIN
     ;AnyKey
     jsr SetGameScreen
 NewGame    
     jsr SetStatusToR
     jsr SetStart        
+    jsr WorldToScreen
+    jsr FadeColorsIN
     jsr GameR
     jsr GameOverR
     AnyKey
+    jsr FadeColorsOUT
     jsr HiScoreR
     jsr SetStatusToL
     jsr SetStart        
+    jsr WorldToScreen
+    jsr FadeColorsIN
     jsr GameL
     jsr GameOverL
     AnyKey
+    jsr FadeColorsOUT
     jsr HiScoreL   
     jmp NewGame
     rts
@@ -1209,13 +1214,19 @@ higher5
 FadeColor
     sty COLOR2
     sty COLOR4
+    sty PCOLR0
+    sty PCOLR1
+    sty PCOLR2
+    sty PCOLR3
     waitRTC
     iny
     cpy #$10
     bne FadeColor
-    lda #$0f
-    sta COLOR4
-    sta COLOR2
+    lda #$0c
+    sta PCOLR0
+    sta PCOLR1
+    sta PCOLR2
+    sta PCOLR3
     rts
 .endp
 ;-----------------------------------------------
@@ -1224,12 +1235,13 @@ FadeColor
 FadeColor
     sty COLOR2
     sty COLOR4
+    sty PCOLR0
+    sty PCOLR1
+    sty PCOLR2
+    sty PCOLR3
     waitRTC
     dey
     bpl FadeColor
-    lda #$00
-    sta COLOR2
-    sta COLOR4
     rts
 .endp
 ;-----------------------------------------------
@@ -1242,18 +1254,15 @@ FadeColor
     mva #>PMgraph PMBASE
     lda #%00000010    ; P/M on
     sta GRACTL
-    lda #$0c
-    sta PCOLR0
-    sta PCOLR1
-    sta PCOLR2
-    sta PCOLR3
-    lda #90
+    ;lda #$0c
+    ;sta PCOLR0
+    ;sta PCOLR1
+    ;sta PCOLR2
+    ;sta PCOLR3
+    lda #0
     sta HPOSP0
-    lda #70
     sta HPOSP1
-    lda #60
     sta HPOSP2
-    lda #80
     sta HPOSP3 
     rts
 .endp
