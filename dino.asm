@@ -49,11 +49,15 @@ PMgraph
 font1
     ins 'artwork/dino1.fnt'  ; 1 charset
 font2 = font1+$400
-    ins 'artwork/dino2.fnt'  ; 2 charset
+    org font2+256
+    ins 'artwork/dino2.fnt',+256,256  ; 2 charset
 font3 = font2+$400
-    ins 'artwork/dino3.fnt'  ; 3 charset
+    org font3+256
+    ins 'artwork/dino3.fnt',+256,256  ; 3 charset
 font4 = font3+$400
-    ins 'artwork/dino4.fnt'  ; 4 charset
+    org font4+256
+    ins 'artwork/dino4.fnt',+256,256  ; 4 charset
+    org font4+$400
 ; display list
 GameDL
     :8 .byte SKIP8   ; empty lines
