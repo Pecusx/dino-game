@@ -13,7 +13,7 @@
     icl '../lib/MACRO.ASM'
 ;---------------------------------------------------
     ; BASIC off
-    ORG $2000
+    ORG $2700
     mva #$ff portb
     mwa #DL_pre dlptrs
     lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
@@ -47,7 +47,7 @@ leet_anim
     ;is the letter leetable?
     cmp #"a"
     bcc next_letter
-    cmp #"z"
+    cmp #"z"+1
     bcs next_letter
     ;letter is leetable
     beq next_letter
@@ -121,7 +121,7 @@ leet_speek2
 leet_speek3
     dta "4&[)eF9-|jk_mn0p@r57uvw*y2"
 leet_speek4
-    dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxyz"
+    dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxy/"
 
 leet_speeks_l
     .by <leet_speek1
@@ -135,6 +135,7 @@ leet_speeks_h
     .by >leet_speek4
 leet_screen 
     .ds 32*9
+leet_screen_end 
     ini $2000
 ;---------------------------------------------------
 
@@ -221,7 +222,7 @@ please_wait_loop
 @
     inx
     cpx #13
-    sne:ldx #0
+    sne:ldx #1
     jmp please_wait_loop
 
 exit_tech_diff
@@ -261,9 +262,6 @@ sample_end4
 sample5
     ins 'wait5.wav.bin'
 sample_end5
-sample6
-    ins 'wait6.wav.bin'
-sample_end6
 
 samples_l
     .by <sample1
@@ -278,7 +276,6 @@ samples_l
     .by <sample2
     .by <sample4
     .by <sample2
-    .by <sample6
 samples_h
     .by >sample1
     .by >sample2
@@ -292,7 +289,6 @@ samples_h
     .by >sample2
     .by >sample4
     .by >sample2
-    .by >sample6
 samples_end_l
     .by <sample_end1
     .by <sample_end2
@@ -306,7 +302,6 @@ samples_end_l
     .by <sample_end2
     .by <sample_end4
     .by <sample_end2
-    .by <sample_end6
 samples_end_h
     .by >sample_end1
     .by >sample_end2
@@ -320,6 +315,5 @@ samples_end_h
     .by >sample_end2
     .by >sample_end4
     .by >sample_end2
-    .by >sample_end6
 finito
     ini start
