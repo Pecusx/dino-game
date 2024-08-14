@@ -1,0 +1,1253 @@
+mads 2.1.7 build 3 (13 Sep 23)
+Source: tech_diff.asm
+     1 				; tech diff https://www.youtube.com/live/xXDjtDJf69E?si=Sg9HLaZ1krfz-m12&t=1578
+     2 				;---------------------------------------------------
+     3 				    OPT r+
+     4
+     5 				;---------------------------------------------------
+     6 				; Zpage variables
+     7 				    .zpvar temp_w   .word = $80
+     8 				    .zpvar temp_b   .byte
+     9 				    .zpvar temp_w2  .word
+    10 				    .zpvar temp_w3  .word
+    11 				;---------------------------------------------------
+    12 				    icl '../lib/ATARISYS.ASM'
+Source: ATARISYS.ASM
+     1 				;****************************************************************************
+     2 				;*                         ATARI PERSONAL COMPUTER                          *
+     3 				;*                              SYSTEM EQUATES                              *
+     4 				;****************************************************************************
+     5 				;
+     6 				; OPERATING SYSTEM EQUATE FILE
+     7 				;
+     8 				; MODULE ORIGIN TABLE
+     9 				;
+    10 				; VECTOR TABLE
+    11 				;
+    12 				; HANDLER ENTRY POINTS ARE CALL-
+    13 				; ED OUT IN THE FOLLOWING VECTOR
+    14 				; TABLE. THESE ARE THE ADDRESSES
+    15 				; MINUS ONE.
+    16 				;
+    17 				; EXAMPLE FOR EDITOR
+    18 				;
+    19 				; E400     OPEN
+    20 				;    2     CLOSE
+    21 				;    4     GET
+    22 				;    6     PUT
+    23 				;    8     STATUS
+    24 				;    A     SPECIAL
+    25 				;    C     JUMP TO POWER ON INIT
+    26 				;    F     NOT USED
+    27 				;
+    28 = E400			EDITRV	EQU	$E400	;EDITOR
+    29 = E410			SCRENV	EQU	$E410	;TV SCREEN
+    30 = E420			KEYBDV	EQU	$E420	;KEYBOARD
+    31 = E430			PRINTV	EQU	$E430	;PRINTER
+    32 = E440			CASETV	EQU	$E440	;CASSETTE
+    33 				;
+    34 				; JUMP VECTOR TABLE
+    35 				;
+    36 				; THE FOLLOWING IS A TABLE OF
+    37 				; JUMP INSTRUCTIONS TO VARIOUS
+    38 				; ENTRY POINTS IN THE OPERATING
+    39 				; SYSTEM
+    40 				;
+    41 = E450			DISKIV	EQU	$E450	;DISK INITIALIZATION
+    42 = E453			DSKINV	EQU	$E453	;DISK INTERFACE
+    43 = E456			CIOV  	EQU	$E456	;CENTRAL I/O ROUTINE
+    44 = E459			SIOV  	EQU	$E459	;SERIAL I/O ROUTINE
+    45 = E45C			SETVBV	EQU	$E45C	;SET SYSTEM TIMERS
+    46 = E45F			SYSVBV	EQU	$E45F	;VBLANK CALCULATIONS
+    47 = E462			XITVBV	EQU	$E462	;EXIT VBLANK
+    48 = E465			SIOINV	EQU	$E465	;SIO INITIALIZATION
+    49 = E468			SENDEV	EQU	$E468	;SEND ENABLE ROUTINE
+    50 = E46B			INTINV	EQU	$E46B	;INTRPT HANDLER INIT
+    51 = E46E			CIOINV	EQU	$E46E	;CIO INITIALIZATION
+    52 = E471			BLKBDV	EQU	$E471	;BLACKBOARD MODE
+    53 = E474			WARMSV	EQU	$E474	;WARM START VECTOR
+    54 = E477			COLDSV	EQU	$E477	;COLD START VECTOR
+    55 = E47A			RBLOKV	EQU	$E47A	;CASSETTE READ BLOCK
+    56 = E47D			CSOPIV	EQU	$E47D	;CASSETTE INPUT OPEN
+    57 				;
+    58 				; VECTORS ADDED FOR 800XL
+    59 				;
+    60 = E480			PUPDIV	EQU	$E480	;POWER UP DISPLAY
+    61 = E483			SLFTSV	EQU	$E483	;SELF TEST PROGRAM
+    62 = E486			PHENTV	EQU	$E486	;UPLOADED HANDLER ENTER
+    63 = E489			PHULNV	EQU	$E489	;UPLOADED HANDLER UNLINK
+    64 = E48C			PHINIV	EQU	$E48C	;UPLOADED HANDLER INIT
+    65 				;
+    66 				; OPERATING SYSTEM EQUATES
+    67 				;
+    68 				; COMMAND CODES FOR IOCBS
+    69 				;
+    70 = 0003			_OPEN  	EQU	$03	;OPEN FOR I/O
+    71 = 0005			GETREC	EQU	$05	;GET RECORD (TEXT)
+    72 = 0007			GETCHR	EQU	$07	;GET CHARACTER(S)
+    73 = 0009			PUTREC	EQU	$09	;PUT RECORD (TEXT)
+    74 = 000B			PUTCHR	EQU	$0B	;PUT CHARACTER(S)
+    75 = 000C			_CLOSE 	EQU	$0C	;CLOSE DEVICE
+    76 = 000D			STATIS	EQU	$0D	;STATUS REQUEST
+    77 = 000E			SPECIL	EQU	$0E	;SPECIAL ENTRY COMMAND
+    78 				;
+    79 				; SPECIAL ENTRY COMMANDS
+    80 				;
+    81 = 0011			DRAWLN	EQU	$11	;DRAW LINE
+    82 = 0012			FILLIN	EQU	$12	;FILL
+    83 = 0020			RENAME	EQU	$20	;RENAME DISK FILE
+    84 = 0021			DELETE	EQU	$21	;DELETE DISK FILE
+    85 = 0022			FORMAT	EQU	$22	;FORMAT DISK
+    86 = 0023			LOCKFL	EQU	$23	;LOCK FILE
+    87 = 0024			UNLOCK	EQU	$24	;UNLOCK FILE
+    88 = 0025			POINT 	EQU	$25	;POINT SECTOR
+    89 = 0026			NOTE  	EQU	$26	;NOTE SECTOR
+    90 = 00FF			IOCFRE	EQU	$FF	;IOCB "FREE"
+    91 				;
+    92 				; AUX1 EQUATES
+    93 				; () INDICATES WHICH DEVICES
+    94 				;
+    95 = 0001			APPEND	EQU	$01	;WR APPEND(D)-SCN RD(E)
+    96 = 0002			DIRECT	EQU	$02	;OPEN DIRECTORY(D)
+    97 = 0004			OPNIN 	EQU	$04	;OPEN FOR INPUT(ALL)
+    98 = 0008			OPNOT 	EQU	$08	;OPEN FOR OUTPUT(ALL)
+    99 = 000C			OPNINO	EQU	$0C	;OPEN INPUT&OUTPUT(ALL)
+   100 = 0010			MXDMOD	EQU	$10	;OPEN MIXED MODE(E,S)
+   101 = 0020			INSCLR	EQU	$20	;OPEN W/O CLEAR(E,S)
+   102 				;
+   103 				; DEVICE NAMES
+   104 				;
+   105 = 0045			SCREDT	EQU	'E'	;SCREEN EDITOR (R/W)
+   106 = 004B			KBD   	EQU	'K'	;KEYBOARD (R ONLY)
+   107 = 0053			DISPLY	EQU	'S'	;SCREEN DISPLAY (R/W)
+   108 = 0050			PRINTR	EQU	'P'	;PRINTER (W ONLY)
+   109 = 0043			CASSET	EQU	'C'	;CASSETTE (R/W)
+   110 = 0052			RS232 	EQU	'R'	;MODEM (R/W)
+   111 = 0044			DISK  	EQU	'D'	;DISK (R/W)
+   112 				;
+   113 				;
+   114 				;
+   115 				; OPERATING SYSTEM STATUS CODES
+   116 				;
+   117 = 0001			SUCCES	EQU	$01	;SUCCESSFUL OPERATION
+   118 = 0080			BRKABT	EQU	$80	;BREAK KEY ABORT
+   119 = 0081			PRVOPN	EQU	$81	;IOCB ALREADY OPEN
+   120 = 0082			NONDEV	EQU	$82	;NON-EXISTANT DEVICE
+   121 = 0083			WRONLY	EQU	$83	;IOCB OPEN FOR W ONLY
+   122 = 0084			NVALID	EQU	$84	;INVALID COMMAND
+   123 = 0085			NOTOPN	EQU	$85	;DEVICE/FILE NOT OPEN
+   124 = 0086			BADIOC	EQU	$86	;INVALID IOCB #
+   125 = 0087			RDONLY	EQU	$87	;IOCB OPEN FOR R ONLY
+   126 = 0088			EOFERR	EQU	$88	;END OF FILE
+   127 = 0089			TRNRCD	EQU	$89	;TRUNCATED RECORD
+   128 = 008A			TIMOUT	EQU	$8A	;PERIPHERAL TIMEOUT
+   129 = 008B			DNACK 	EQU	$8B	;DEVICE NO ACKNOWLEDGE
+   130 = 008C			FRMERR	EQU	$8C	;SERIAL BUS FRAME ERR
+   131 = 008D			CRSROR	EQU	$8D	;CURSOR OVERRANGE
+   132 = 008E			OVRRUN	EQU	$8E	;SERIAL DATA OVERRUN
+   133 = 008F			CHKERR	EQU	$8F	;SERIAL CHECKSUM ERR
+   134 = 0090			DERRER	EQU	$90	;PERIPHRAL DEVICE ERR
+   135 = 0091			BADMOD	EQU	$91	;BAD SCREEN MODE #
+   136 = 0092			FNCNOT	EQU	$92	;NONEXISTANT FUNCTION
+   137 = 0093			SCRMEM	EQU	$93	;SCREEN MEM TOO SMALL
+   138 = 00AA			FILENF  EQU $AA ;FILE NOT FOUND
+   139 				;
+   140 				; PAGE ZERO RAM ASSIGNMENTS
+   141 				;
+   142 = 0000			LNFLG 	EQU	$00	;LINBUG RAM
+   143 = 0001			NGFLAG	EQU	$01	;POWER-UP SELF-TEST FLAG
+   144 				;
+   145 				; THESE LOCATIONS NOT CLEARED
+   146 				;
+   147 = 0002			CASINI	EQU	$02	;CASSETTE INIT LOC
+   148 = 0004			RAMLO 	EQU	$04	;RAM POINTER MEM TST
+   149 = 0006			TRAMSZ	EQU	$06	;TEMP REG RAM SIZE
+   150 = 0007			TSTDAT	EQU	$07	;RAM TEST DATA REG
+   151 				;
+   152 				;CLEARED ON COLDSTART ONLY
+   153 				;
+   154 = 0008			WARMST	EQU	$08	;WARM START FLAG
+   155 = 0009			BOOTQ 	EQU	$09	;SUCCESSFUL BOOT FLG
+   156 = 000A			DOSVEC	EQU	$0A	;DOS START VECTOR
+   157 = 000C			DOSINI	EQU	$0C	;DOS INIT ADDRESS
+   158 = 000E			APPMHI	EQU	$0E	;APPL MEM HI LIMIT
+   159 				;
+   160 				;CLEARED ON COLD OR WARM START
+   161 				;
+   162 = 0010			POKMSK	EQU	$10	;MASK POKEY IRQ
+   163 = 0011			BRKKEY	EQU	$11	;BREAK KEY FLAG
+   164 = 0012			RTCLOK	EQU	$12	;REAL TIME CLOCK
+   165 = 0015			BUFADR	EQU	$15	;INDIRECT BUFF ADDR
+   166 = 0017			ICCOMT	EQU	$17	;COMMAND FOR VECTOR
+   167 = 0018			DSKFMS	EQU	$18	;FMS POINTER
+   168 = 001A			DSKUTL	EQU	$1A	;DISK UTILITIES PTR
+   169 = 001C			ABUFPT	EQU	$1C	;RESERVED
+   170 = 0020			ICHIDZ	EQU	$20	;HANDLER INDEX #
+   171 = 0021			ICDNOZ	EQU	$21	;DEVICE NUMBER
+   172 = 0022			ICCOMZ	EQU	$22	;COMMAND CODE
+   173 = 0023			ICSTAZ	EQU	$23	;STATUS RETURN
+   174 = 0024			ICBALZ	EQU	$24	;BUFFER ADDRESS
+   175 = 0025			ICBAHZ	EQU	$25
+   176 = 0026			ICPTLZ	EQU	$26	;PUT BYTE ROUTINE-1
+   177 = 0027			ICPTHZ	EQU	$27
+   178 = 0028			ICBLLZ	EQU	$28	;BUFFER LENGTH
+   179 = 0029			ICBLHZ	EQU	$29
+   180 = 002A			ICAX1Z	EQU	$2A	;AUXILIARY BYTES
+   181 = 002B			ICAX2Z	EQU	$2B
+   182 = 002C			ICSPRZ	EQU	$2C	;SPARE BYTES
+   183 = 002E			ICIDNO	EQU	$2E	;IOCB # X 16
+   184 = 002F			CIOCHR	EQU	$2F	;CIO CHARACTER BYTE
+   185 = 0030			STATUS	EQU	$30	;INTERNAL STATUS
+   186 = 0031			CHKSUM	EQU	$31	;CHECKSUM
+   187 = 0032			BUFRLO	EQU	$32	;DATA BUFFER LO BYTE
+   188 = 0033			BUFRHI	EQU	$33	;DATA BUFFER HI BYTE
+   189 = 0034			BFENLO	EQU	$34	;NEXT BYTE PAST DATA
+   190 = 0035			BFENHI	EQU	$35	;BUFFER (HI & LO)
+   191 = 0036			LTEMP 	EQU	$36	;LOADER TEMP
+   192 = 0038			BUFRFL	EQU	$38	;DATA BUFFR FULL FLG
+   193 = 0039			RECVDN	EQU	$39	;RECIEVE DONE FLAG
+   194 = 003A			XMTDON	EQU	$3A	;XMIT DONE FLAG
+   195 = 003B			CHKSNT	EQU	$3B	;CHECKSUM SENT FLAG
+   196 = 003C			NOCKSM	EQU	$3C	;NO CHKSUM SENT FLAG
+   197 				;BPTR  	EQU	$3D	;CASSETTE DATA INDEX
+   198 = 003E			FTYPE 	EQU	$3E	;INTERRECORD GAP TYPE
+   199 = 003F			FEOF  	EQU	$3F	;END OF FILE FLAG
+   200 = 0040			FREQ  	EQU	$40	;BEEP COUNT
+   201 = 0041			SOUNDR	EQU	$41	;NOISY I/O FLAG
+   202 = 0042			CRITIC	EQU	$42	;CRITICAL MODE
+   203 = 0043			FMSZPG	EQU	$43	;FMS ZERO PAGE
+   204 = 004A			ZCHAIN	EQU	$4A	;HANDLER LOADER TEMP
+   205 = 004C			DSTAT 	EQU	$4C	;DISPLAY STATUS
+   206 = 004D			ATRACT	EQU	$4D	;ATTRACT FLAG
+   207 = 004E			DRKMSK	EQU	$4E	;DARK ATTRACT MASK
+   208 = 004F			COLRSH	EQU	$4F	;COLOR SHIFTER
+   209 = 0050			TMPCHR	EQU	$50	;TEMP STORAGE
+   210 = 0051			HOLD1 	EQU	$51	;TEMP STORAGE
+   211 = 0052			LMARGN	EQU	$52	;LEFT MARGIN (1)
+   212 = 0053			RMARGN	EQU	$53	;RIGHT MARGIN (38)
+   213 = 0054			ROWCRS	EQU	$54	;CURSOR COUNTERS
+   214 = 0055			COLCRS	EQU	$55
+   215 = 0057			DINDEX	EQU	$57	;DISPLAY MODE #
+   216 = 0058			SAVMSC	EQU	$58	;SCREEN MEM ADDR
+   217 = 005A			OLDROW	EQU	$5A	;DRAW START POSIT
+   218 = 005B			OLDCOL	EQU	$5B
+   219 = 005D			OLDCHR	EQU	$5D	;DATA UNDER CURSOR
+   220 = 005E			OLDADR	EQU	$5E	;CURSOR MEM ADDR
+   221 = 0060			FKDEF 	EQU	$60	;FUNC KEY DEFEAT POINTER
+   222 = 0062			PALNTS	EQU	$62	;PAL/NTSC FLAG
+   223 = 0063			LOGCOL	EQU	$63	;COL IN LOGICAL LINE
+   224 = 0064			ADRESS	EQU	$64	;TEMP STORAGE
+   225 = 0066			MLTEMP	EQU	$66	;TEMP STORAGE
+   226 = 0068			SAVADR	EQU	$68	;TEMP STORAGE
+   227 = 006A			RAMTOP	EQU	$6A	;AVAILABLE RAM PAGES
+   228 = 006B			BUFCNT	EQU	$6B	;BUFFER COUNT
+   229 = 006C			BUFSTR	EQU	$6C	;EDITOR GETCH POINTR
+   230 = 006E			BITMSK	EQU	$6E	;BIT MASK
+   231 = 006F			SHFAMT	EQU	$6F	;PIXEL JUSTIFICATION
+   232 = 0070			ROWAC 	EQU	$70	;ROW ACCUMULATOR
+   233 = 0072			COLAC 	EQU	$72	;COLUMN ACCUMULATOR
+   234 = 0074			ENDPT 	EQU	$74	;LINE LENGTH
+   235 = 0076			DELTAR	EQU	$76	;DELTA ROW
+   236 = 0077			DELTAC	EQU	$77	;DELTA COLUMN
+   237 = 0079			KEYDEF	EQU	$79	;KEY DEFEAT POINTER
+   238 = 007B			SWPFLG	EQU	$7B	;SPLIT SCN CURS CNTL
+   239 = 007C			HOLDCH	EQU	$7C	;KB CHAR TEMP HOLD
+   240 = 007D			INSDAT	EQU	$7D	;TEMP STORAGE
+   241 = 007E			COUNTR	EQU	$7E	;DRAW ITERATION CNT
+   242 				;
+   243 				; 80-FF ARE RESERVED FOR USER
+   244 				;
+   245 				; NOTE: SEE FLOATING POINT
+   246 				; SUBROUTINE AREA FOR ZERO
+   247 				; PAGE CELLS
+   248 				;
+   249 				; PAGE 1 - HARDWARE STACK
+   250 				;
+   251 				; PAGE TWO RAM ASSIGNMENTS
+   252 				;
+   253 = 0200			VDSLST	EQU	$0200	;DSP LIST NMI VECTOR
+   254 = 0202			VPRCED	EQU	$0202	;PROCEED IRQ VECTOR
+   255 = 0204			VINTER	EQU	$0204	;INTERUPT IRQ VECTOR
+   256 = 0206			VBREAK	EQU	$0206	;BRK INST IRQ VECTOR
+   257 = 0208			VKEYBD	EQU	$0208	;POKEY KB IRQ VECTOR
+   258 = 020A			VSERIN	EQU	$020A	;POKEY INPUT RDY IRQ
+   259 = 020C			VSEROR	EQU	$020C	;POKEY OUTPUT RDY
+   260 = 020E			VSEROC	EQU	$020E	;POKEY OUTPUT DONE
+   261 = 0210			VTIMR1	EQU	$0210	;POKEY TIMER 1 IRQ
+   262 = 0212			VTIMR2	EQU	$0212	;POKEY TIMER 2 IRQ
+   263 = 0214			VTIMR4	EQU	$0214	;POKEY TIMER 4 IRQ
+   264 = 0216			VIMIRQ	EQU	$0216	;IMMED IRQ VECTOR
+   265 = 0218			CDTMV1	EQU	$0218	;COUNT DOWN TIMER 1
+   266 = 021A			CDTMV2	EQU	$021A	;COUNT DOWN TIMER 2
+   267 = 021C			CDTMV3	EQU	$021C	;COUNT DOWN TIMER 3
+   268 = 021E			CDTMV4	EQU	$021E	;COUNT DOWN TIMER 4
+   269 = 0220			CDTMV5	EQU	$0220	;COUNT DOWN TIMER 5
+   270 = 0222			VVBLKI	EQU	$0222	;IMM VBLK NMI VECTOR
+   271 = 0224			VVBLKD	EQU	$0224	;DEF VBLK NMI VECTOR
+   272 = 0226			CDTMA1	EQU	$0226	;CDTMV1 JSR ADDRESS
+   273 = 0228			CDTMA2	EQU	$0228	;CDTMV2 JSR ADDRESS
+   274 = 022A			CDTMF3	EQU	$022A	;CDTMV3 FLAG
+   275 = 022B			SRTIMR	EQU	$022B	;SOFTWARE REPEAT TMR
+   276 = 022C			CDTMF4	EQU	$022C	;CDTMV4 FLAG
+   277 = 022D			INTEMP	EQU	$022D	;IAN'S TEMP
+   278 = 022E			CDTMF5	EQU	$022E	;CDTMV5 FLAG
+   279 = 022F			DMACTLS	EQU	$022F	;SAVE DMACTL REG
+   280 = 0230			DLPTRS	EQU	$0230	;SAVE DISP LIST LO
+   281 				;SDLSTH	EQU	$0231	;SAVE DISP LIST HI
+   282 = 0232			SSKCTL	EQU	$0232	;SKCTL REGISTER RAM
+   283 = 0233			LCOUNT	EQU	$0233	;LOADER TEMP
+   284 = 0234			LPENH 	EQU	$0234	;LIGHT PEN HORIZONTAL
+   285 = 0235			LPENV 	EQU	$0235	;LIGHT PEN VERTICAL
+   286 = 0236			BRKKY 	EQU	$0236	;BREAK KEY VECTOR
+   287 = 0238			RELADR	EQU	$0238	;LOADER REL ADDR
+   288 = 023A			CDEVIC	EQU	$023A	;COMMAND BUFFER-DEV
+   289 = 023B			CCOMND	EQU	$023B	;COMMAND BUFFER-CMND
+   290 = 023C			CAUX1 	EQU	$023C	;COMMAND BUFFER AUX1
+   291 = 023D			CAUX2 	EQU	$023D	;COMMAND BUFFER AUX2
+   292 				;TEMP  	EQU	$023E	;TEMPORARY RAM CELL
+   293 = 023F			ERRFLG	EQU	$023F	;DEVICE ERROR FLAG
+   294 = 0240			DFLAGS	EQU	$0240	;DISK FLAGS(SECTOR1)
+   295 = 0241			DBSECT	EQU	$0241	;# DISK BOOT SECTORS
+   296 = 0242			BOOTAD	EQU	$0242	;DISK BOOT ADDRESS
+   297 = 0244			COLDST	EQU	$0244	;COLDSTART FLAG 1=CS
+   298 = 0245			RECLEN	EQU	$0245	;LOADER LENGTH
+   299 = 0246			DSKTIM	EQU	$0246	;DISK TIME OUT REG
+   300 = 026C			VSFLAG	EQU	$026C	;FINE SCROLL TEMP
+   301 = 026D			KEYDIS	EQU	$026D	;KEY DISABLE FLAG
+   302 = 026E			FINE  	EQU	$026E	;FINE SCROLL ENABLE(A1200)
+   303 = 026F			GPRIOR	EQU	$026F	;GLOBAL PRIORITY
+   304 = 0270			PADDL0	EQU	$0270	;POT 0 RAM CELL
+   305 = 0271			PADDL1	EQU	$0271
+   306 = 0272			PADDL2	EQU	$0272
+   307 = 0273			PADDL3	EQU	$0273
+   308 = 0278			STICK0	EQU	$0278	;JOYSTICK 0 RAM CELL
+   309 = 0279			STICK1	EQU	$0279
+   310 = 027C			PTRIG0	EQU	$027C	;PADDLE TRIGGER 0
+   311 = 027D			PTRIG1	EQU	$027D
+   312 = 027E			PTRIG2	EQU	$027E
+   313 = 027F			PTRIG3	EQU	$027F
+   314 = 0284			STRIG0	EQU	$0284	;JOYSTICK TRIGGER 0
+   315 = 0285			STRIG1	EQU	$0285
+   316 = 0288			HIBYTE	EQU	$0288	;LOADER
+   317 = 0289			WMODE 	EQU	$0289	;CASSETTE R/W MODE
+   318 = 028A			BLIM  	EQU	$028A	;CASSETTE RECORD SIZE
+   319 = 028B			IMASK 	EQU	$028B
+   320 = 028C			JVECK 	EQU	$028C	;JUMP VECTOR
+   321 = 028E			NEWADR	EQU	$028E	;LOADER NEW ADDRESS
+   322 = 0290			TXTROW	EQU	$0290	;TEXT ROWCRS
+   323 = 0291			TXTCOL	EQU	$0291	;TEXT COLCRS
+   324 = 0293			TINDEX	EQU	$0293	;TEXT INDEX
+   325 = 0294			TXTMSC	EQU	$0294	;TEXT WINDOW MEM ADD
+   326 = 0296			TXTOLD	EQU	$0296	;TEXT OLDROW & COL
+   327 = 029C			CRETRY	EQU	$029C	;# COMMAND RETRIES
+   328 = 029D			HOLD3 	EQU	$029D
+   329 = 029E			SUBTMP	EQU	$029E
+   330 = 029F			HOLD2 	EQU	$029F
+   331 = 02A0			DMASK 	EQU	$02A0	;PIXEL LOCATION MASK
+   332 = 02A1			TMPLBT	EQU	$02A1
+   333 = 02A2			ESCFLG	EQU	$02A2	;ESCAPE FLAG
+   334 = 02A3			TABMAP	EQU	$02A3	;TAB STOP MAP
+   335 = 02B2			LOGMAP	EQU	$02B2 	;LINE START BIT MAP
+   336 = 02B6			INVFLG	EQU	$02B6	;INVERSE VIDEO FLAG
+   337 = 02B7			FILFLG	EQU	$02B7	;FILL FLAG FOR DRAW
+   338 = 02B8			TMPROW	EQU	$02B8
+   339 = 02B9			TMPCOL	EQU	$02B9
+   340 = 02BB			SCRFLG	EQU	$02BB	;SET IF SCROLLING
+   341 = 02BC			HOLD4 	EQU	$02BC	;TEMP USED BY DRAW
+   342 = 02BD			DRETRY	EQU	$02BD	;# OF DEVICE RETRIES
+   343 = 02BE			SHFLOK	EQU	$02BE	;SHIFT/CTL LOCK FLAG
+   344 = 02BF			BOTSCR	EQU	$02BF	;BOTTOM OF SCREEN
+   345 = 02C0			PCOLR0	EQU	$02C0	;P0 COLOR
+   346 = 02C1			PCOLR1	EQU	$02C1	;P1 COLOR
+   347 = 02C2			PCOLR2	EQU	$02C2	;P2 COLOR
+   348 = 02C3			PCOLR3	EQU	$02C3	;P3 COLOR
+   349 = 02C4			COLOR0	EQU	$02C4	;COLOR 0
+   350 = 02C5			COLOR1	EQU	$02C5
+   351 = 02C6			COLOR2	EQU	$02C6
+   352 = 02C7			COLOR3	EQU	$02C7
+   353 = 02C8			COLOR4	EQU	$02C8
+   354 = 02C8			COLBAKS EQU COLOR4
+   355 = 02C9			RUNADR	EQU	$02C9	;LOADER
+   356 = 02CB			HIUSED	EQU	$02CB	;LOADER
+   357 = 02CD			ZHIUSE	EQU	$02CD	;LOADER
+   358 = 02CF			GBYTEA	EQU	$02CF	;LOADER
+   359 = 02D1			LOADAD	EQU	$02D1	;LOADER
+   360 = 02D3			ZLOADA	EQU	$02D3	;LOADER
+   361 = 02D5			DSCTLN	EQU	$02D5	;DISK SECTOR LENGTH
+   362 = 02D7			ACMISR	EQU	$02D7	;RESERVED
+   363 = 02D9			KRPDEL	EQU	$02D9	;KEY REPEAT DELAY
+   364 = 02DA			KEYREP	EQU	$02DA	;KEY REPEAT RATE(VBLANKS)
+   365 = 02DB			NOCLIK	EQU	$02DB	;CLICK ENABLE/DISABLE
+   366 = 02DC			HELPFG	EQU	$02DC	;HELP KEY FLAG
+   367 = 02DD			DMASAV	EQU	$02DD	;DMA SAVE STATE
+   368 = 02DE			PBPNT 	EQU	$02DE	;PRINT BUFFER POINTER
+   369 = 02DF			PBUFSZ	EQU	$02DF	;PRINT BUFFER SIZE
+   370 = 02E0			DOSRUN	EQU	$02E0	;DOS RUN/INIT ADDRESSES
+   371 = 02E4			RAMSIZ	EQU	$02E4	;RAM SIZE-HIGH BYTE
+   372 = 02E5			MEMTOP	EQU	$02E5	;TOP OF AVAIL MEMORY
+   373 = 02E7			MEMLO 	EQU	$02E7	;BOTTOM OF AVAIL MEM
+   374 = 02E9			HNDLOD	EQU	$02E9	;POLL FLAG (1200)
+   375 = 02EA			DVSTAT	EQU	$02EA	;STATUS BUFFER
+   376 = 02EE			CBAUDL	EQU	$02EE	;CASSETTE BAUD RATE
+   377 = 02EF			CBAUDH	EQU	$02EF
+   378 = 02F0			CRSINH	EQU	$02F0	;CURSOR INHIBIT 0=ON
+   379 = 02F1			KEYDEL	EQU	$02F1	;KEY DELAY
+   380 = 02F2			CH1	    EQU	$02F2	;PRIOR KB CHAR CODE
+   381 = 02F3			CHACT 	EQU	$02F3	;CHACTL REGISTER RAM
+   382 = 02F4			CHBAS 	EQU	$02F4	;CHBAS REGISTER RAM
+   383 = 02F5			NEWROW	EQU	$02F5	;POINT DRAW GOES TO
+   384 = 02F6			NEWCOL	EQU	$02F6
+   385 = 02F8			ROWINC	EQU	$02F8	;ROW INCREMENT VALUE
+   386 = 02F9			COLINC	EQU	$02F9	;COL INCREMENT VALUE
+   387 = 02FA			CHAR  	EQU	$02FA	;INTERNAL CHAR CODE
+   388 = 02FB			ATACHR	EQU	$02FB	;ATASCII CHARACTER
+   389 = 02FC			CHKEY  	EQU	$02FC	;KB CHAR CODE (FIFO)
+   390 = 02FD			FILDAT	EQU	$02FD	;RIGHT FILL DATA
+   391 = 02FE			DSPFLG	EQU	$02FE	;DISPLAY FLAG
+   392 = 02FF			SSFLAG	EQU	$02FF	;START/STOP FLAG
+   393 				;
+   394 				; PAGE THREE RAM ASSIGNMENTS
+   395 				;
+   396 = 0300			DDEVIC	EQU	$0300	;BUS I.D. NUMBER
+   397 = 0301			DUNIT 	EQU	$0301	;UNIT NUMBER
+   398 = 0302			DCOMND	EQU	$0302	;BUS COMMAND
+   399 = 0303			DSTATS	EQU	$0303	;COMMAND TYPE/STATUS
+   400 = 0304			DBUFLO	EQU	$0304	;DATA BUFFER LO BYTE
+   401 = 0305			DBUFHI	EQU	$0305	;DATA BUFFER HI BYTE
+   402 = 0306			DTIMLO	EQU	$0306	;DEVICE TIMEOUT SECS
+   403 = 0307			DUNUSE	EQU	$0307	;UNUSED BYTE
+   404 = 0308			DBYTLO	EQU	$0308	;# OF BYTES XFERRED
+   405 = 0309			DBYTHI	EQU	$0309
+   406 = 030A			DAUX1 	EQU	$030A	;COMMAND AUX BYTE 1
+   407 = 030B			DAUX2 	EQU	$030B	;COMMAND AUX BYTE 2
+   408 = 030C			TIMER1	EQU	$030C	;INITIAL TIMER VALUE
+   409 = 030E			JMPERS	EQU	$030E	;OPTIONS (1200)
+   410 = 030F			CASFLG	EQU	$030F	;CASSETE MODE IF SET
+   411 = 0310			TIMER2	EQU	$0310	;FINAL TIMER VALUE
+   412 				;TEMP1 	EQU	$0312	;TEMP STORAGE
+   413 				;TEMP2 	EQU	$0313	;TEMP STORAGE
+   414 = 0314			PTIMOT	EQU	$0314	;PRINTER TIMEOUT REG
+   415 				;TEMP3 	EQU	$0315	;TEMP STORAGE
+   416 = 0316			SAVIO 	EQU	$0316	;SAVE SERIAL IN DATA
+   417 = 0317			TIMFLG	EQU	$0317	;TIMEOUT FLAG C BAUD
+   418 = 0318			STACKP	EQU	$0318	;SIO STACK PTR SAVE
+   419 = 0319			TSTAT 	EQU	$0319	;TEMP STATUS HOLDER
+   420 = 031A			HATABS	EQU	$031A	;HANDLER ADDR TABLE
+   421 = 033D			PUPBT1	EQU	$033D	;POWER/UP RESET
+   422 = 033E			PUPBT2	EQU	$033E
+   423 = 033F			PUPBT3	EQU	$033F
+   424 = 0340			ICHID 	EQU	$0340	;HANDLER INDEX #
+   425 = 0341			ICDNO 	EQU	$0341	;DEVICE NUMBER
+   426 = 0342			ICCOM 	EQU	$0342	;COMMAND CODE
+   427 = 0343			ICSTA 	EQU	$0343	;STATUS
+   428 = 0344			ICBAL 	EQU	$0344	;BUFFER ADDR LO BYTE
+   429 = 0345			ICBAH 	EQU	$0345	;BUFFER ADDR HI BYTE
+   430 = 0346			ICPTL 	EQU	$0346	;PUT ROUTINE ADDR-1
+   431 = 0347			ICPTH 	EQU	$0347
+   432 = 0348			ICBLL 	EQU	$0348	;BUFFER LENGTH LO
+   433 = 0349			ICBLH 	EQU	$0349	;BUFFER LENGTH HI
+   434 = 034A			ICAX1 	EQU	$034A	;AUX BYTE 1
+   435 = 034B			ICAX2 	EQU	$034B	;AUX BYTE 2
+   436 = 034C			ICSPR 	EQU	$034C 	;SPARE BYTES
+   437 = 03C0			PRNBUF	EQU	$03C0	;PRINTER BUFFER (40 BYTES)
+   438 = 03E8			SUPERF	EQU	$03E8	;SCREEN EDITOR
+   439 = 03E9			CKEY  	EQU	$03E9	;START KEY FLAG
+   440 = 03EA			CASSBT	EQU	$03EA	;CASSETTE BOOT FLAG
+   441 = 03EB			CARTCK	EQU	$03EB	;CARTRIDGE CHECKSUM
+   442 = 03ED			ACMVAR	EQU	$03ED	;RESERVED
+   443 = 03F9			MINTLK	EQU	$03F9	;RESERVED
+   444 = 03FA			GINTLK	EQU	$03FA	;CART INTERLOCK
+   445 = 03FB			CHLINK	EQU	$03FB	;HANDLER CHAIN
+   446 				;
+   447 				; PAGE FOUR RAM ASSIGNMENTS
+   448 				;
+   449 = 03FD			CASBUF	EQU	$03FD	;CASSETTE BUFFER (131 BYTES)
+   450 = 0480			USAREA	EQU	$0480	;USER AREA
+   451 				;
+   452 				; PAGE FIVE AND SIX ARE RESERVED
+   453 				; FOR USER WORK SPACE
+   454 				;
+   455 				;    COLLEEN MNEMONICS
+   456 				;
+   457 				; ---------------------------------------------------------------------------
+   458 = D200			POKEY 	EQU	$D200
+   459 				; ---------------------------------------------------------------------------
+   460 				;
+   461 				; READ
+   462 				;
+   463 = D200			POT0  	EQU	POKEY+$00
+   464 = D201			POT1  	EQU	POKEY+$01
+   465 = D202			POT2  	EQU	POKEY+$02
+   466 = D203			POT3  	EQU	POKEY+$03
+   467 = D204			POT4  	EQU	POKEY+$04
+   468 = D205			POT5  	EQU	POKEY+$05
+   469 = D206			POT6  	EQU	POKEY+$06
+   470 = D207			POT7  	EQU	POKEY+$07
+   471 = D208			ALLPOT	EQU	POKEY+$08
+   472 = D209			KBCODE	EQU	POKEY+$09
+   473 = D20A			RANDOM	EQU	POKEY+$0a
+   474 = D20B			POTGO 	EQU	POKEY+$0b
+   475 = D20D			SERIN 	EQU	POKEY+$0d
+   476 = D20E			IRQST 	EQU	POKEY+$0e
+   477 = D20F			SKSTAT	EQU	POKEY+$0f
+   478 				;
+   479 				; WRITE
+   480 				;
+   481 = D200			AUDF1 	EQU	POKEY+$00
+   482 = D201			AUDC1 	EQU	POKEY+$01
+   483 = D202			AUDF2 	EQU	POKEY+$02
+   484 = D203			AUDC2 	EQU	POKEY+$03
+   485 = D204			AUDF3 	EQU	POKEY+$04
+   486 = D205			AUDC3 	EQU	POKEY+$05
+   487 = D206			AUDF4 	EQU	POKEY+$06
+   488 = D207			AUDC4 	EQU	POKEY+$07
+   489 = D208			AUDCTL	EQU	POKEY+$08
+   490 = D209			STIMER	EQU	POKEY+$09
+   491 = D20A			SKRES 	EQU	POKEY+$0a
+   492 = D20D			SEROUT	EQU	POKEY+$0d
+   493 = D20E			IRQEN 	EQU	POKEY+$0e
+   494 = D20F			SKCTL 	EQU	POKEY+$0f
+   495 				;
+   496 				;
+   497 				;
+   498 				; ---------------------------------------------------------------------------
+   499 = D000			GTIA  	EQU	$D000
+   500 				; ---------------------------------------------------------------------------
+   501 				;
+   502 				; WRITE
+   503 				;
+   504 = D000			HPOSP0	EQU	GTIA+$00
+   505 = D001			HPOSP1	EQU	GTIA+$01
+   506 = D002			HPOSP2	EQU	GTIA+$02
+   507 = D003			HPOSP3	EQU	GTIA+$03
+   508 = D004			HPOSM0	EQU	GTIA+$04
+   509 = D005			HPOSM1	EQU	GTIA+$05
+   510 = D006			HPOSM2	EQU	GTIA+$06
+   511 = D007			HPOSM3	EQU	GTIA+$07
+   512 = D008			SIZEP0	EQU	GTIA+$08
+   513 = D009			SIZEP1	EQU	GTIA+$09
+   514 = D00A			SIZEP2	EQU	GTIA+$0a
+   515 = D00B			SIZEP3	EQU	GTIA+$0b
+   516 = D00C			SIZEM 	EQU	GTIA+$0c
+   517 = D00D			GRAFP0	EQU	GTIA+$0d
+   518 = D00E			GRAFP1	EQU	GTIA+$0e
+   519 = D00F			GRAFP2	EQU	GTIA+$0f
+   520 = D010			GRAFP3	EQU	GTIA+$10
+   521 = D011			GRAFM 	EQU	GTIA+$11
+   522 = D012			COLPM0	EQU	GTIA+$12
+   523 = D013			COLPM1	EQU	GTIA+$13
+   524 = D014			COLPM2	EQU	GTIA+$14
+   525 = D015			COLPM3	EQU	GTIA+$15
+   526 = D016			COLPF0	EQU	GTIA+$16
+   527 = D017			COLPF1	EQU	GTIA+$17
+   528 = D018			COLPF2	EQU	GTIA+$18
+   529 = D019			COLPF3	EQU	GTIA+$19
+   530 = D01A			COLBAK	EQU	GTIA+$1a
+   531 = D01B			PRIOR 	EQU	GTIA+$1b
+   532 = D01C			VDELAY	EQU	GTIA+$1c
+   533 = D01D			GRACTL	EQU	GTIA+$1d
+   534 = D01E			HITCLR	EQU	GTIA+$1e
+   535 = D01F			CONSOL	EQU	GTIA+$1f
+   536 				;
+   537 				; READ
+   538 				;
+   539 = D000			M0PF  	EQU	GTIA+$00
+   540 = D001			M1PF  	EQU	GTIA+$01
+   541 = D002			M2PF  	EQU	GTIA+$02
+   542 = D003			M3PF  	EQU	GTIA+$03
+   543 = D004			P0PF  	EQU	GTIA+$04
+   544 = D005			P1PF  	EQU	GTIA+$05
+   545 = D006			P2PF  	EQU	GTIA+$06
+   546 = D007			P3PF  	EQU	GTIA+$07
+   547 = D008			M0PL  	EQU	GTIA+$08
+   548 = D009			M1PL  	EQU	GTIA+$09
+   549 = D00A			M2PL  	EQU	GTIA+$0a
+   550 = D00B			M3PL  	EQU	GTIA+$0b
+   551 = D00C			P0PL  	EQU	GTIA+$0c
+   552 = D00D			P1PL  	EQU	GTIA+$0d
+   553 = D00E			P2PL  	EQU	GTIA+$0e
+   554 = D00F			P3PL  	EQU	GTIA+$0f
+   555 = D010			TRIG0 	EQU	GTIA+$10
+   556 = D011			TRIG1 	EQU	GTIA+$11
+   557 = D012			TRIG2 	EQU	GTIA+$12
+   558 = D013			TRIG3 	EQU	GTIA+$13
+   559 = D014			PAL     EQU GTIA+$14
+   560 				;
+   561 				;
+   562 				; ---------------------------------------------------------------------------
+   563 = D400			ANTIC 	EQU	$D400
+   564 				; ---------------------------------------------------------------------------
+   565 				;
+   566 = D400			DMACTL	EQU	ANTIC+$00
+   567 = D401			CHACTL	EQU	ANTIC+$01
+   568 = D402			DLPTR	EQU	ANTIC+$02
+   569 				;DLISTH	EQU	ANTIC+$03
+   570 = D404			HSCROL	EQU	ANTIC+$04
+   571 = D405			VSCROL	EQU	ANTIC+$05
+   572 = D407			PMBASE	EQU	ANTIC+$07
+   573 = D409			CHBASE	EQU	ANTIC+$09
+   574 = D40A			WSYNC 	EQU	ANTIC+$0a
+   575 = D40B			VCOUNT	EQU	ANTIC+$0b
+   576 = D40C			PENH  	EQU	ANTIC+$0c
+   577 = D40D			PENV  	EQU	ANTIC+$0d
+   578 = D40E			NMIEN 	EQU	ANTIC+$0e
+   579 = D40F			NMIRES	EQU	ANTIC+$0f
+   580 = D40F			NMIST 	EQU	ANTIC+$0f
+   581 				;
+   582 				;
+   583 				; ---------------------------------------------------------------------------
+   584 = D300			PIA   	EQU	$D300
+   585 				; ---------------------------------------------------------------------------
+   586 				;
+   587 = D300			PORTA 	EQU	PIA+0
+   588 = D301			PORTB 	EQU	PIA+1
+   589 = D302			PACTL 	EQU	PIA+2
+   590 = D303			PBCTL 	EQU	PIA+3
+   591 				;
+   592 				; ---------------------------------------------------------------------------
+   593 				;                 Atari ANTIC chip display list equates
+   594 				; ---------------------------------------------------------------------------
+   595 				;
+   596 = 0001			JUMP	EQU	$01	; display list jump instruction (3 byte)
+   597 = 0041			JVB	    EQU	$41	; display list jump and wait for vblank instruction (3)
+   598 				;
+   599 = 0010			SCH	    EQU	$10	; display list horizontal scrolling
+   600 = 0020			SCV	    EQU	$20	; display list vertical scrolling
+   601 = 0040			LMS	    EQU	$40	; display list load memory scan instruction (3 byte)
+   602 = 0080			DLII	EQU	$80	; display list interrupt instruction
+   603 				;
+   604 = 0000			SKIP1	EQU	$00	; display list skip 1 scan line instruction
+   605 = 0010			SKIP2	EQU	$10	; display list skip 2 scan lines instruction
+   606 = 0020			SKIP3	EQU	$20	; display list skip 3 scan lines instruction
+   607 = 0030			SKIP4	EQU	$30	; display list skip 4 scan lines instruction
+   608 = 0040			SKIP5	EQU	$40	; display list skip 5 scan lines instruction
+   609 = 0050			SKIP6	EQU	$50	; display list skip 6 scan lines instruction
+   610 = 0060			SKIP7	EQU	$60	; display list skip 7 scan lines instruction
+   611 = 0070			SKIP8	EQU	$70	; display list skip 8 scan lines instruction
+   612 				;
+   613 = 0002			MODE2	EQU	$02	; display list mode 2
+   614 = 0004			MODE4	EQU	$04	; display list mode 4
+   615 = 0008			MODE8	EQU	$08	; display list mode 8
+   616 = 000E			MODEE	EQU	$0E	; display list mode E
+   617 = 000F			MODEF	EQU	$0F	; display list mode F
+   618 				; ---------------------------------------------------------------------------
+   619 				; ENUMS
+   620 				; ---------------------------------------------------------------------------
+   621
+   622 				.enum   @dmactl
+   623 = 0000			    blank   =    %00
+   624 = 0001			    narrow  =    %01
+   625 = 0002			    standard=    %10
+   626 = 0003			    wide    =    %11
+   627 = 0004			    missiles=   %100
+   628 = 0008			    players =  %1000
+   629 = 0010			    lineX1  = %10000
+   630 = 0000			    lineX2  = %00000
+   631 = 0020			    dma =    %100000
+   632 				.ende
+   633
+   634 = 003F			scr48   = @dmactl(wide|dma|players|missiles|lineX1)
+   635 = 003E			scr40   = @dmactl(standard|dma|players|missiles|lineX1)
+   636 = 003D			scr32   = @dmactl(narrow|dma|players|missiles|lineX1)
+   637
+   638 				.enum   @pmcntl
+   639 = 0001			    missiles=   %1
+   640 = 0002			    players =  %10
+   641 = 0004			    trigs   = %100
+   642 				.ende
+   643
+   644 				.enum   @gtictl
+   645 = 0000			    prior0  =        %0
+   646 = 0001			    prior1  =        %1
+   647 = 0002			    prior2  =       %10
+   648 = 0004			    prior4  =      %100
+   649 = 0008			    prior8  =     %1000
+   650 = 0010			    ply5    =    %10000 ; Fifth Player Enable
+   651 = 0020			    mlc     =   %100000 ; Multiple Color Player Enable
+   652 = 0040			    mode9   = %01000000
+   653 = 0080			    mode10  = %10000000
+   654 = 00C0			    mode11  = %11000000
+   655 				.ende
+   656 				; ---------------------------------------------------------------------------
+   657 				; KBCODEs
+   658 				; ---------------------------------------------------------------------------
+   659 				.enum @kbcode
+   660 = 00FF			    _none  = 255
+   661 = 001C			    _esc   = 28
+   662 = 001F			    _1     = 31
+   663 = 001E			    _2     = 30
+   664 = 001A			    _3     = 26
+   665 = 0018			    _4     = 24
+   666 = 001D			    _5     = 29
+   667 = 001B			    _6     = 27
+   668 = 0033			    _7     = 51
+   669 = 0035			    _8     = 53
+   670 = 0030			    _9     = 48
+   671 = 0032			    _0     = 50
+   672 = 0036			    _lt    = 54
+   673 = 0037			    _gt    = 55
+   674 = 0034			    _del   = 52
+   675 = 002C			    _tab   = 44
+   676 = 002F			    _Q     = 47
+   677 = 002E			    _W     = 46
+   678 = 002A			    _E     = 42
+   679 = 0028			    _R     = 40
+   680 = 002D			    _T     = 45
+   681 = 002B			    _Y     = 43
+   682 = 000B			    _U     = 11
+   683 = 000D			    _I     = 13
+   684 = 0008			    _O     = 8
+   685 = 000A			    _P     = 10
+   686 = 000E			    _min   = 14
+   687 = 000E			    _up    =  14  ; cursor function 
+   688 = 000F			    _eq    = 15
+   689 = 000F			    _down  = 15 ; cursor function
+   690 = 000C			    _ret   = 12
+   691 = 003F			    _A     = 63
+   692 = 003E			    _S     = 62
+   693 = 003A			    _D     = 58
+   694 = 0038			    _F     = 56
+   695 = 003D			    _G     = 61
+   696 = 0039			    _H     = 57
+   697 = 0001			    _J     = 1
+   698 = 0005			    _K     = 5
+   699 = 0000			    _L     = 0
+   700 = 0002			    _semicolon = 2
+   701 = 0006			    _plus  = 6
+   702 = 0006			    _left  = 6  ; cursor function
+   703 = 0007			    _asterisk = 7
+   704 = 0007			    _right = 7 ; cursor function
+   705 = 003C			    _caps  = 60
+   706 = 0017			    _Z     = 23
+   707 = 0016			    _X     = 22
+   708 = 0012			    _C     = 18
+   709 = 0010			    _V     = 16
+   710 = 0015			    _B     = 21
+   711 = 0024			    _N     = 36
+   712 = 0025			    _M     = 37
+   713 = 0020			    _comma = 32
+   714 = 0022			    _dot   = 34
+   715 = 0026			    _slash = 38
+   716 = 0027			    _atari = 39
+   717 = 0011			    _help  = 17
+   718 = 0003			    _F1    = 3
+   719 = 0004			    _F2    = 4
+   720 = 0013			    _F3    = 19
+   721 = 0014			    _F4    = 20
+   722 = 0021			    _space = 33
+   723 				.ende
+   724 = 009B			EOL = $9b
+   724 = 0080			TEMP_W
+   724 = 0082			TEMP_B
+   724 = 0083			TEMP_W2
+   724 = 0085			TEMP_W3
+    13 				    icl '../lib/MACRO.ASM'
+Source: MACRO.ASM
+     1 				;-------------------------------------
+     2 				  .MACRO ROLW
+     3 				     ROL :1
+     4 				    ROL :1+1
+     5 				  .ENDM
+     6 				;-------------------------------------
+     7 				  .MACRO ASLW
+     8 				    ASL :1
+     9 				    ROL :1+1
+    10 				  .ENDM
+    11 				;-------------------------------------
+    12 				  .MACRO RORW
+    13 				    ROR :1+1
+    14 				    ROR :1
+    15 				  .ENDM
+    16 				;-------------------------------------
+    17 				  .MACRO LSRW
+    18 				    LSR :1+1
+    19 				    ROR :1
+    20 				  .ENDM
+    21
+    22 				;-------------------------------------
+    23 				         .MACRO VMAIN
+    24 				;	VMAIN #WORD,interrupt.vector
+    25 				; interrupt.vector:
+    26 				;    0 - VIMIRQ
+    27 				;    1 - TIMCNT1
+    28 				;    2 - TIMCNT2
+    29 				;    3 - TIMCNT3
+    30 				;    4 - TIMCNT4
+    31 				;    5 - TIMCNT5
+    32 				;    6 - VVBLKI
+    33 				;    7 - VVBLKD
+    34 				;    8 - TIMVEC1
+    35 				;    9 - TIMVEC2
+    36 				;	Initialises Vertical Blank Interrupts
+    37 				;       (works only with system interrupts ON)
+    38 				         LDY # <:1
+    39 				         LDX # >:1
+    40 				         LDA #:2
+    41 				         JSR SETVBV
+    42 				         .ENDM
+    43 				;-------------------------------------
+    44 				         .MACRO VDLI
+    45 				;	VDLI #WORD
+    46 				;	Initialises Display List Interrupts
+    47 				         LDY # <:1
+    48 				         LDX # >:1
+    49 				         LDA #$C0
+    50 				         STY $0200
+    51 				         STX $0201
+    52 				         STA NMIEN
+    53 				         .ENDM
+    54 				;-------------------------------------
+    55 				        .MACRO VDL
+    56 				;   VDL #WORD
+    57 				;   Changes Display List addres
+    58 				; and sets width of the screen
+    59 				;    vdl dl,$01 - narrow screen (32 bytes)
+    60 				;    vdl dl,$02 - normal screen (40 bytes)
+    61 				;    vdl dl,$03 - wide screen   (48 bytes)
+    62 				;       (works only with system interrupts ON)
+    63 				
+    64 				         .if %0=2
+    65 				           lda dmactls
+    66 				           and #$fc
+    67 				           ora #%2
+    68 				           sta dmactls
+    69 				         .endif
+    70 				
+    71 				         LDA # <%1
+    72 				         STA DLPTRS
+    73 				         LDA # >%1
+    74 				         STA DLPTRS+1
+    75 				         .ENDM
+    76 				;-------------------------------------
+    77 				      .MACRO halt
+    78 				?stop  
+    79 				      lda RANDOM 
+    80 				      and #$05
+    81 				      sta COLBAK
+    82 				      jmp ?stop
+    83 				      .ENDM
+    84 				;-------------------------------------
+    85 				         .MACRO KEY
+    86 				;	KEY
+    87 				;	waits for releasing and pressing "any key"
+    88 				         PHA
+    89 				?CK1      LDA SKSTAT
+    90 				         AND #$04
+    91 				         BEQ ?CK1
+    92 				?CK       LDA SKSTAT
+    93 				         AND #$04
+    94 				         BNE ?CK
+    95 				         PLA
+    96 				         .ENDM
+    97 				;-------------------------------------
+    98 					.MACRO WAIT
+    99 				;	WAIT
+   100 				;	waits one frame (1/50 s(PAL) or 1/60s(NTSC))
+   101 				?ze	LDA VCOUNT
+   102 					cmp #16	; if line<16 then wait for line>15 (long VBI protection)
+   103 					bcc ?ze
+   104 					sbc #10	; last lines correction
+   105 				?wa	cmp VCOUNT
+   106 					bcc ?wa
+   107 				?wf	cmp VCOUNT
+   108 					bcs ?wf
+   109 					.ENDM
+   110 				;-------------------------------------
+   111 					.macro waitRTC
+   112 					lda RTCLOK+2
+   113 				?wa	cmp RTCLOK+2
+   114 					beq ?wa
+   115 					.endm
+   116 				;-------------------------------------
+   117 				    .macro negw
+   118 				    ; negate the given word (0-a)
+   119 				;-------------------------------------
+   120 				        sec
+   121 				        lda #$00
+   122 				        sbc :1
+   123 				        sta :1
+   124 				        lda #$00
+   125 				        sbc :1+1
+   126 				        sta :1+1
+   127 				    .endm
+   128 				;-------------------------------------
+   129 				    .macro randomize
+   130 				    ;usage: randomize floor ceiling
+   131 				    ;returns (in A) a random .byte between "floor" and "ceiling"
+   132 				    .if :2 < :1
+   133 				      .error "floor higher than ceiling"
+   134 				    .endif
+   135 				?rand
+   136 				      lda random
+   137 				      cmp #:2+1-:1 ;ceiling
+   138 				      bcs ?rand
+   139 				    .if %1>0    ; if floor = 0 - no add offset
+   140 				      adc #:1
+   141 				    .endif
+   142 				    .endm
+   143 				;-------------------------------------
+   144 				    .macro phx
+   145 				      txa
+   146 				      pha
+   147 				    .endm
+   148 				;-------------------------------------
+   149 				    .macro phy
+   150 				      tya
+   151 				      pha
+   152 				    .endm
+   153 				;-------------------------------------
+   154 				    .macro plx
+   155 				      pla
+   156 				      tax
+   157 				    .endm
+   158 				;-------------------------------------
+   159 				    .macro ply
+   160 				      pla
+   161 				      tay
+   162 				    .endm
+   163 				;-------------------------------------
+   164 				    .macro txy
+   165 				      txa
+   166 				      tay
+   167 				    .endm
+   168 				;-------------------------------------
+   169 				    .macro tyx
+   170 				      tya
+   171 				      tax
+   172 				    .endm
+   173 				;-------------------------------------
+   174 				    .macro pause
+   175 				      ;waits :1 number (byte) of frames
+   176 				      ldx #:1
+   177 				?PAUSELOOP
+   178 				      wait
+   179 				      dex
+   180 				      bne ?PAUSELOOP
+   181 				    .ENDM
+   182 				;-------------------------------------
+   183 				    .MACRO POKEY_INIT
+   184 				    ;   Initialises Pokey chip (required before playing sounds)
+   185 				      mva #0 AUDCTL
+   186 				      mva #3 SKSTAT
+   187 				    .ENDM   
+    14 				;---------------------------------------------------
+    15 				    ; BASIC off
+    16 				    ORG $2700
+    17 FFFF> 2700-295B> A9 FF +     mva #$ff portb
+    18 2705 A9 AC 8D 30 02 A9 +     mwa #DL_pre dlptrs
+    19 270F A9 21		    lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
+    20 2711 8D 2F 02		    sta dmactls
+    21 2714 A9 00 8D C6 02	    mva #0 COLOR2
+    22 2719 8D 1A D0		    sta COLBAK
+    23 271C A9 0F 8D C5 02	    mva #15 COLOR1
+    24 2721 20 94 27		    jsr wait_for_releasing_keyz
+    25 				    
+    26 2724			leet_anim
+    27 				    ; test for going further
+    28 2724 AD 1F D0		    lda CONSOL
+    29 2727 C9 07		    cmp #7
+    30 2729 D0 65		    bne leet_end
+    31 				     ; check keyboard
+    32 272B AD 0F D2		    lda SKSTAT
+    33 272E C9 F7		    cmp #$f7    ; SHIFT
+    34 2730 F0 5E		    beq leet_end
+    35 2732 C9 FF		    cmp #$ff
+    36 2734 D0 5A		    bne leet_end
+    37 2736 AD 10 D0		    lda TRIG0
+    38 2739 F0 55		    beq leet_end   
+    39 				 
+    40 				 
+    41 273B A9 CC 85 80 A9 27 +     mwa #pre_screen temp_w
+    42 2743 A9 5C 85 85 A9 29 +     mwa #leet_screen temp_w3
+    43 274B A0 00		    ldy #0
+    44 				@
+    45 274D B1 80		    lda (temp_w),y
+    46 274F F0 20		    beq next_letter     ; ignore zeroes
+    47 				    ;is the letter leetable?
+    48 2751 C9 61		    cmp #"a"
+    49 2753 90 1C		    bcc next_letter
+    50 2755 C9 7B		    cmp #"z"+1
+    51 2757 B0 18		    bcs next_letter
+    52 				    ;letter is leetable
+    53 2759 F0 16		    beq next_letter
+    54 275B 38			    sec
+    55 275C E9 61		    sbc #"a"
+    56 275E A8			    tay     ;save the letter
+    57 275F AD 0A D2		    lda RANDOM
+    58 2762 29 03		    and #%00000011   ; 0-3
+    59 2764 AA			    tax
+    60 2765 BD 54 29		    lda leet_speeks_l,x
+    61 2768 85 83		    sta temp_w2
+    62 276A BD 58 29		    lda leet_speeks_h,x
+    63 276D 85 84		    sta temp_w2+1
+    64 276F B1 83		    lda (temp_w2),y
+    65 2771			next_letter
+    66 2771 A0 00		    ldy #0
+    67 2773 91 85		    sta (temp_w3),y
+    68 2775 E6 80 D0 02 E6 81	    inw temp_w
+    69 277B E6 85 D0 02 E6 86	    inw temp_w3
+    70 2781 A5 81 C9 28 D0 04 +     cpw temp_w #pre_screen_end
+    71 278B F0 97		    beq leet_anim
+    72 278D 4C 4D 27		    jmp @-
+    73
+    74 2790			leet_end
+    75 2790 20 94 27		    jsr wait_for_releasing_keyz
+    76 2793 60			    rts
+    77 				    
+    78
+    79 2794			.proc wait_for_releasing_keyz
+    80 2794 AD 1F D0		@   lda CONSOL
+    81 2797 C9 07		    cmp #7
+    82 2799 D0 F9		    bne @-
+    83 				     ; check keyboard
+    84 279B AD 0F D2		@   lda SKSTAT
+    85 279E C9 F7		    cmp #$f7    ; SHIFT
+    86 27A0 F0 F9		    beq @-
+    87 27A2 C9 FF		    cmp #$ff
+    88 27A4 D0 F5		    bne @-
+    89 27A6 AD 10 D0		@   lda TRIG0
+    90 27A9 F0 FB		    beq @-
+    91 27AB 60			    rts
+    92 				.endp
+    93
+    94 27AC			DL_pre
+    95 27AC 70 70 70 70 70 70 +     :8 .by SKIP8
+    96 27B4 42			    .by LMS+MODE2
+    97 27B5 5C 29		    .wo leet_screen
+    98 27B7 00 02		    .by SKIP1, MODE2
+    99 27B9 70			    .by SKIP8
+   100 27BA 00 02		    .by SKIP1, MODE2
+   101 27BC 70			    .by SKIP8
+   102 27BD 00 02 00 02 00 02 +     :6 .by SKIP1, MODE2
+   103 27C9 41			    .by JVB
+   104 27CA AC 27		    .wo DL_pre
+   105 27CC			pre_screen
+   106 				    ;    01234567890123456789012345678901"
+   107 27CC 74 68 69 73 00 6C +     dta "this little game was created in "
+   108 27EC 00 66 6F 75 72 00 +     dta " four evenings before SV2K24SE  "
+   109 280C 73 6F 72 72 79 00 +     dta "sorry for technical difficulties"
+   110 282C 63 6F 64 65 1A 00 +     dta "code:                           "
+   111 284C 00 00 00 00 00 00 +     dta "        pecus & pirx            "
+   112 286C 73 6F 75 6E 64 1A +     dta "sound:                          "
+   113 288C 00 00 00 00 00 00 +     dta "        alex, jochen hippel     "
+   114 28AC 67 66 78 1A 00 00 +     dta "gfx:                            "
+   115 28CC 00 00 00 00 00 00 +     dta "        alphabet, inc.          "
+   116 28EC			pre_screen_end
+   117 28EC			leet_speek1
+   118 28EC 61 62 63 64 65 66 +     dta "abcdefghijklmnopqrstuvwxyz"
+   119 2906			leet_speek2
+   120 2906 21 22 23 24 25 26 +     dta "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+   121 2920			leet_speek3
+   122 2920 14 06 3B 09 65 26 +     dta "4&[)eF9-|jk_mn0p@r57uvw*y2"
+   123 293A			leet_speek4
+   124 293A 3E 62 08 1E 5B 41 +     dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxy/"
+   125
+   126 2954			leet_speeks_l
+   127 2954 EC			    .by <leet_speek1
+   128 2955 06			    .by <leet_speek2
+   129 2956 20			    .by <leet_speek3
+   130 2957 3A			    .by <leet_speek4
+   131 2958			leet_speeks_h
+   132 2958 28			    .by >leet_speek1
+   133 2959 29			    .by >leet_speek2
+   134 295A 29			    .by >leet_speek3
+   135 295B 29			    .by >leet_speek4
+   136 295C			leet_screen 
+   137 = 295C			    .ds 32*9
+   138 2A7C			leet_screen_end 
+   139 02E2-02E3> 00 20		    ini $2000
+   140 				;---------------------------------------------------
+   141
+   142 				    org $3000
+   143 3000			screen
+   144 3000-98F4> FF FE FF F0 +     ins 'difficulties.bmp',+62
+   145 3410			DL
+   146 3410 70 70 70 70 70 70 +     :13 .by SKIP8
+   147 341D 4F			    .by MODEF+LMS
+   148 341E 00 30		    .wo screen
+   149 3420 0F 0F 0F 0F 0F 0F +     :25 .by MODEF
+   150 3439 41			    .by JVB
+   151 343A 10 34		    .wo DL
+   152 				    
+   153 343C			start
+   154 343C A9 10 8D 30 02 A9 +     mwa #DL dlptrs
+   155 3446 A9 3E		    lda #@dmactl(standard|dma|players|missiles|lineX1)  ; normal screen width, DL on, P/M on
+   156 3448 8D 2F 02		    sta dmactls
+   157 344B A9 00 8D C6 02	    mva #0 COLOR2
+   158 3450 8D 1A D0		    sta COLBAK
+   159 3453 A9 0F 8D C5 02	    mva #15 COLOR1
+   160 3458			    POKEY_INIT
+Macro: POKEY_INIT [Source: MACRO.ASM]
+     2 3458 A9 00 8D 08 D2	      mva #0 AUDCTL
+     3 345D A9 03 8D 0F D2	      mva #3 SKSTAT
+Source: tech_diff.asm
+   161 3462			    pause 3
+Macro: PAUSE [Source: MACRO.ASM]
+     2 3462 A2 03		      ldx #3
+     3 3464			?PAUSELOOP
+     3 3464 AD 0B D4		?ze	LDA VCOUNT
+     4 3467 C9 10			cmp #16	; if line<16 then wait for line>15 (long VBI protection)
+     5 3469 90 F9			bcc ?ze
+     6 346B E9 0A			sbc #10	; last lines correction
+     7 346D CD 0B D4		?wa	cmp VCOUNT
+     8 3470 90 FB			bcc ?wa
+     9 3472 CD 0B D4		?wf	cmp VCOUNT
+    10 3475 B0 FB			bcs ?wf
+Source: tech_diff.asm
+     5 3477 CA			      dex
+     6 3478 D0 EA		      bne ?PAUSELOOP
+Source: tech_diff.asm
+   162 347A A9 00		    lda #0
+   163 347C 8D 0E D4		    sta $d40e   ; NMI OFF 
+   164 347F 78			    sei         ; IRQ OFF
+   165 				    
+   166 				    
+   167 				    ;-----playa-da-sampla-----
+   168 3480 A2 00		    ldx #0
+   169
+   170 3482			please_wait_loop    
+   171 3482 BD C9 98		    lda samples_l,x
+   172 3485 8D 99 34		    sta sample_load
+   173 3488 BD D4 98		    lda samples_h,x
+   174 348B 8D 9A 34		    sta sample_load+1
+   175 				    
+   176 348E BD DF 98		    lda samples_end_l,x
+   177 3491 85 80		    sta temp_w
+   178 3493 BD EA 98		    lda samples_end_h,x
+   179 3496 85 81		    sta temp_w+1
+   180 				    
+   181 				@    
+   182 3498 AD FF FF		    lda sample_load: $ffff
+   183 349B A8			    tay
+   184 349C 38			    sec
+   185 349D 6A 6A 6A 6A		    :4 ror
+   186 34A1 8D 01 D2		    sta AUDC1
+   187 34A4 8D 03 D2		    sta AUDC2
+   188 34A7 8D 05 D2		    sta AUDC3
+   189 				    ;sta AUDC4
+   190 34AA 8D 0A D4		    sta wsync ;------------
+   191 				       ; test for going further
+   192 34AD AD 1F D0		    lda CONSOL
+   193 34B0 C9 07		    cmp #7
+   194 34B2 D0 50		    bne exit_tech_diff
+   195 				     ; check keyboard
+   196 34B4 AD 0F D2		    lda SKSTAT
+   197 34B7 C9 F7		    cmp #$f7    ; SHIFT
+   198 34B9 F0 49		    beq exit_tech_diff
+   199 34BB C9 FF		    cmp #$ff
+   200 34BD D0 45		    bne exit_tech_diff
+   201 34BF 8D 0A D4		    sta wsync ;------------
+   202 34C2 AD 10 D0		    lda TRIG0
+   203 34C5 F0 3D		    beq exit_tech_diff   
+   204 34C7 8D 0A D4		    sta wsync ;------------
+   205
+   206 34CA 98			    tya
+   207 34CB 29 0F		    and #$0F
+   208 34CD 09 10		    ora #$10
+   209 34CF 8D 01 D2		    sta AUDC1
+   210 34D2 8D 03 D2		    sta AUDC2
+   211 34D5 8D 05 D2		    sta AUDC3
+   212 				    ;sta AUDC4
+   213
+   214
+   215 34D8 EE 99 34 D0 03 EE +     inw sample_load
+   216 34E0 8D 0A D4		    sta wsync
+   217 34E3 AD 9A 34 C5 81 D0 +     cpw sample_load temp_w
+   218 34EF 8D 0A D4		    sta wsync
+   219 34F2 F0 06		    beq @+
+   220 34F4 8D 0A D4		    sta wsync
+   221 34F7 4C 98 34		    jmp @-    
+   222 				@
+   223 34FA E8			    inx
+   224 34FB E0 0B		    cpx #11
+   225 34FD D0 02 A2 01		    sne:ldx #1
+   226 3501 4C 82 34		    jmp please_wait_loop
+   227
+   228 3504			exit_tech_diff
+   229 				    ; wait for releasing keyz
+   230 3504 AD 1F D0		@   lda CONSOL
+   231 3507 C9 07		    cmp #7
+   232 3509 D0 F9		    bne @-
+   233 				     ; check keyboard
+   234 350B AD 0F D2		@   lda SKSTAT
+   235 350E C9 F7		    cmp #$f7    ; SHIFT
+   236 3510 F0 F9		    beq @-
+   237 3512 C9 FF		    cmp #$ff
+   238 3514 D0 F5		    bne @-
+   239 3516 AD 10 D0		@   lda TRIG0
+   240 3519 F0 FB		    beq @-
+   241 				    
+   242 				;
+   243 351B A9 40		    lda #$40
+   244 351D 8D 0E D4		    sta $d40e   ; NMI On 
+   245 3520 58			    cli         ; IRQ on
+   246 3521 A9 00 8D 2F 02	    mva #0 DMACTLS
+   247 3526 8D 00 D4		    sta dmactl
+   248 3529 60			    rts 
+   249 				 
+   250 352A			sample1
+   251 352A 57 77 77 77 77 77 +     ins 'wait1.wav.bin'
+   252 4896			sample_end1
+   253 4896			sample2
+   254 4896 43 33 33 33 33 33 +     ins 'wait2.wav.bin'
+   255 6B7B			sample_end2
+   256 6B7B			sample3
+   257 6B7B 32 22 22 22 22 22 +     ins 'wait3.wav.bin'
+   258 6E15			sample_end3
+   259 6E15			sample4
+   260 6E15 56 66 66 66 66 66 +     ins 'wait4.wav.bin'
+   261 70AF			sample_end4
+   262 70AF			sample5
+   263 70AF 57 67 67 67 67 67 +     ins 'wait5.wav.bin'
+   264 98C9			sample_end5
+   265
+   266 98C9			samples_l
+   267 98C9 2A			    .by <sample1
+   268 98CA 96			    .by <sample2
+   269 98CB 7B			    .by <sample3
+   270 98CC 96			    .by <sample2
+   271 98CD 15			    .by <sample4
+   272 98CE 96			    .by <sample2
+   273 98CF AF			    .by <sample5
+   274 98D0 96			    .by <sample2
+   275 98D1 7B			    .by <sample3
+   276 98D2 96			    .by <sample2
+   277 98D3 15			    .by <sample4
+   278 98D4			samples_h
+   279 98D4 35			    .by >sample1
+   280 98D5 48			    .by >sample2
+   281 98D6 6B			    .by >sample3
+   282 98D7 48			    .by >sample2
+   283 98D8 6E			    .by >sample4
+   284 98D9 48			    .by >sample2
+   285 98DA 70			    .by >sample5
+   286 98DB 48			    .by >sample2
+   287 98DC 6B			    .by >sample3
+   288 98DD 48			    .by >sample2
+   289 98DE 6E			    .by >sample4
+   290 98DF			samples_end_l
+   291 98DF 96			    .by <sample_end1
+   292 98E0 7B			    .by <sample_end2
+   293 98E1 15			    .by <sample_end3
+   294 98E2 7B			    .by <sample_end2
+   295 98E3 AF			    .by <sample_end4
+   296 98E4 7B			    .by <sample_end2
+   297 98E5 C9			    .by <sample_end5
+   298 98E6 7B			    .by <sample_end2
+   299 98E7 15			    .by <sample_end3
+   300 98E8 7B			    .by <sample_end2
+   301 98E9 AF			    .by <sample_end4
+   302 98EA			samples_end_h
+   303 98EA 48			    .by >sample_end1
+   304 98EB 6B			    .by >sample_end2
+   305 98EC 6E			    .by >sample_end3
+   306 98ED 6B			    .by >sample_end2
+   307 98EE 70			    .by >sample_end4
+   308 98EF 6B			    .by >sample_end2
+   309 98F0 98			    .by >sample_end5
+   310 98F1 6B			    .by >sample_end2
+   311 98F2 6E			    .by >sample_end3
+   312 98F3 6B			    .by >sample_end2
+   313 98F4 70			    .by >sample_end4
+   314 98F5			finito
+   315 02E2-02E3> 3C 34		    ini start

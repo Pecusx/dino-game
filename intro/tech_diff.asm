@@ -221,7 +221,7 @@ please_wait_loop
     jmp @-    
 @
     inx
-    cpx #13
+    cpx #11
     sne:ldx #1
     jmp please_wait_loop
 
@@ -275,7 +275,6 @@ samples_l
     .by <sample3
     .by <sample2
     .by <sample4
-    .by <sample2
 samples_h
     .by >sample1
     .by >sample2
@@ -288,7 +287,6 @@ samples_h
     .by >sample3
     .by >sample2
     .by >sample4
-    .by >sample2
 samples_end_l
     .by <sample_end1
     .by <sample_end2
@@ -301,7 +299,6 @@ samples_end_l
     .by <sample_end3
     .by <sample_end2
     .by <sample_end4
-    .by <sample_end2
 samples_end_h
     .by >sample_end1
     .by >sample_end2
@@ -314,6 +311,5 @@ samples_end_h
     .by >sample_end3
     .by >sample_end2
     .by >sample_end4
-    .by >sample_end2
 finito
     ini start
