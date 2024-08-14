@@ -457,7 +457,7 @@ Shift
     lda WorldTable-1,y
     bne no_mountain
     lda RANDOM
-    and #%00011111  ; 32:1
+    and #%00111111  ; 64:1
     bne no_mountain
     lda #13
     sta WorldTable-1,y
