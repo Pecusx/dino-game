@@ -1304,7 +1304,7 @@ pressed
 .endp
 ;--------------------------------------------------
 .proc PrepareMusicPlayer
-    jsr StopMusic
+    ;jsr StopMusic
     VMAIN VBLinterrupt,7       ; jsr SetVBL
     rts
 .endp
@@ -1365,10 +1365,10 @@ font4l
 ; SCR_HEIGHT lines 256bytes each
 screen
     .ds $100*SCR_HEIGHT
+    org $6900   ; POZOR!!!
 MUSIC1_DATA
     ins 'music/ingame.mpt',+6  ; ingame music
 MUSIC2_DATA
-    ins 'music/game over.mpt',+6  ; game over music
-
+    ins 'music/gameover.mpt',+6  ; game over music
 
     run FirstSTART
