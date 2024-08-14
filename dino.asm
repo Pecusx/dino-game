@@ -30,34 +30,24 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 ;---------------------------------------------------
     .IF ALONE =1
         ; dark screean and BASIC off
-        ORG $2000
+        ORG $3000
         mva #0 dmactls             ; dark screen
         mva #$ff portb
         ; and wait one frame :)
         waitRTC                   ; or waitRTC ?
         mva #$ff portb        ; BASIC off
         rts
-        ini $2000
+        ini $3000
     .ENDIF
 ;---------------------------------------------------
-
     org $2000
+PLAYER
+    ins 'music/pl_2000.bin'  ; MPT player $2000
+
+    org $2800
 PMgraph
     org PMGraph+$800    ; P/M graphics for clouds
 ;---------------------------------------------------
-; 4 charsets for fine scroll
-font1
-    ins 'artwork/dino1.fnt'  ; 1 charset
-font2 = font1+$400
-    org font2+256
-    ins 'artwork/dino2.fnt',+256,256  ; 2 charset
-font3 = font2+$400
-    org font3+256
-    ins 'artwork/dino3.fnt',+256,256  ; 3 charset
-font4 = font3+$400
-    org font4+256
-    ins 'artwork/dino4.fnt',+256,256  ; 4 charset
-    org font4+$400
 ; display list
 GameDL
     :8 .byte SKIP8   ; empty lines
@@ -1313,6 +1303,21 @@ pressed
     icl 'artwork/shapes.asm'
 ;--------------------------------------------------
     .ALIGN $400
+; 4 charsets for fine scroll
+font1
+    ins 'artwork/dino1.fnt'  ; 1 charset
+font2
+    .ds $100
+    ins 'artwork/dino2.fnt',+256,256  ; 2 charset
+    .ds $200
+font3
+    .ds $100
+    ins 'artwork/dino3.fnt',+256,256  ; 3 charset
+    .ds $200
+font4
+    .ds $100
+    ins 'artwork/dino4.fnt',+256,256  ; 4 charset
+    .ds $200
 ; and 4 charsets for left game :)
 font1l
     .ds $400
@@ -1326,5 +1331,10 @@ font4l
 ; SCR_HEIGHT lines 256bytes each
 screen
     .ds $100*SCR_HEIGHT
+MUSIC1_DATA
+    ins 'music/ingame.mpt',+6  ; ingame music
+MUSIC2_DATA
+    ins 'music/game over.mpt',+6  ; bame over music
+
 
     run FirstSTART
