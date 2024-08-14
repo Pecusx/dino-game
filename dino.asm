@@ -42,7 +42,7 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 ;---------------------------------------------------
     org $2000
 PLAYER
-    ins 'music/pl_2000.bin'  ; MPT player $2000
+    ins 'music/pl_2000.bin',+6  ; MPT player $2000
 
     org $2800
 PMgraph
@@ -116,6 +116,7 @@ FirstSTART
     jsr ClearScreen
     jsr GenerateCharsets
     jsr GenerateClouds
+    jsr PrepareMusicPlayer
     ;AnyKey
     jsr SetGameScreen
 NewGame    
@@ -123,6 +124,7 @@ NewGame
     jsr SetStart        
     jsr WorldToScreen
     jsr FadeColorsIN
+    jsr PlayInGameMusic
     jsr GameR
     jsr GameOverR
     AnyKey
@@ -132,6 +134,7 @@ NewGame
     jsr SetStart        
     jsr WorldToScreen
     jsr FadeColorsIN
+    jsr PlayInGameMusic
     jsr GameL
     jsr GameOverL
     AnyKey
@@ -1300,6 +1303,37 @@ pressed
     rts   
 .endp
 ;--------------------------------------------------
+.proc PrepareMusicPlayer
+    jsr StopMusic
+    VMAIN VBLinterrupt,7       ; jsr SetVBL
+    rts
+.endp
+.proc PlayInGameMusic
+    lda #$00
+    ldy #<MUSIC1_DATA
+    ldx #>MUSIC1_DATA
+    jmp PLAYER  ; rts
+.endp
+.proc PlayGameOverMusic
+    lda #$00
+    ldy #<MUSIC2_DATA
+    ldx #>MUSIC2_DATA
+    jmp PLAYER  ; rts
+.endp
+.proc StopMusic
+    lda #$02
+    jmp PLAYER  ; rts
+.endp
+.proc VBLinterrupt
+    jsr PLAYER+3
+    pla
+    tay
+    pla
+    tax
+    pla
+    rti
+.endp  
+;--------------------------------------------------
     icl 'artwork/shapes.asm'
 ;--------------------------------------------------
     .ALIGN $400
@@ -1334,7 +1368,7 @@ screen
 MUSIC1_DATA
     ins 'music/ingame.mpt',+6  ; ingame music
 MUSIC2_DATA
-    ins 'music/game over.mpt',+6  ; bame over music
+    ins 'music/game over.mpt',+6  ; game over music
 
 
     run FirstSTART
