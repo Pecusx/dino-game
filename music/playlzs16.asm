@@ -160,6 +160,11 @@ start
 @
     lda:cmp:req 20
     jsr player
+    
+    lda $d01f ;consol
+    cmp #7
+    seq:jsr init_song
+    
     jmp @-   
 
 
