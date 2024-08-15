@@ -24,6 +24,7 @@ swap_table=$0600    ; table for swap bytes in left characters :)
     .zpvar JumpPhase        .byte
     .zpvar Hit              .byte
     .zpvar Level            .byte
+    .zpvar play_flag        .byte
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
@@ -42,9 +43,9 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 ;---------------------------------------------------
     org $2000
 PLAYER
-    ins 'music/pl_2000.bin',+6  ; MPT player $2000
+    icl 'music/playlzs16.asm'  ; Music Player
 
-    org $2800
+    org $3000
 PMgraph
     org PMGraph+$800    ; P/M graphics for clouds
 ;---------------------------------------------------
@@ -127,6 +128,7 @@ NewGame
     jsr PlayInGameMusic
     jsr GameR
     jsr GameOverR
+    jsr PlayGameOverMusic
     AnyKey
     jsr FadeColorsOUT
     jsr HiScoreR
@@ -137,6 +139,7 @@ NewGame
     jsr PlayInGameMusic
     jsr GameL
     jsr GameOverL
+    jsr PlayGameOverMusic
     AnyKey
     jsr FadeColorsOUT
     jsr HiScoreL   
@@ -1304,29 +1307,35 @@ pressed
 .endp
 ;--------------------------------------------------
 .proc PrepareMusicPlayer
-    ;jsr StopMusic
+    jsr StopMusic
     VMAIN VBLinterrupt,7       ; jsr SetVBL
     rts
 .endp
 .proc PlayInGameMusic
-    lda #$00
-    ldy #<MUSIC1_DATA
-    ldx #>MUSIC1_DATA
-    jmp PLAYER  ; rts
+    jsr StopMusic
+    mwa #MUSIC1_DATA song_start_ptr
+    mwa #MUSIC1_DATA_END song_end_ptr
+    jsr init_song
+    mva #1 play_flag
+    rts
 .endp
 .proc PlayGameOverMusic
-    lda #$00
-    ldy #<MUSIC2_DATA
-    ldx #>MUSIC2_DATA
-    jmp PLAYER  ; rts
+    jsr StopMusic
+    mwa #MUSIC2_DATA song_start_ptr
+    mwa #MUSIC2_DATA_END song_end_ptr
+    jsr init_song
+    mva #1 play_flag
+    rts
 .endp
 .proc StopMusic
-    lda #$02
-    jmp PLAYER  ; rts
+    mva #0 play_flag
+    rts
 .endp
 .proc VBLinterrupt
-    jsr PLAYER+3
-    pla
+    lda play_flag
+    beq @+
+    jsr PLAYER
+@   pla
     tay
     pla
     tax
@@ -1365,10 +1374,12 @@ font4l
 ; SCR_HEIGHT lines 256bytes each
 screen
     .ds $100*SCR_HEIGHT
-    org $6900   ; POZOR!!!
+    .align $100
 MUSIC1_DATA
-    ins 'music/ingame.mpt',+6  ; ingame music
+    ins 'music/InGame.lzss'  ; ingame music
+MUSIC1_DATA_END
+    .align $100
 MUSIC2_DATA
-    ins 'music/gameover.mpt',+6  ; game over music
-
+    ins 'music/GameOver.lzss'    ; game over music
+MUSIC2_DATA_END
     run FirstSTART

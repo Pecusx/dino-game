@@ -931,157 +931,387 @@ Source: MACRO.ASM
    186 				      mva #3 SKSTAT
    187 				    .ENDM   
     14 				;---------------------------------------------------
-    15 				    ; BASIC off
-    16 				    ORG $2700
-    17 FFFF> 2700-295B> A9 FF +     mva #$ff portb
-    18 2705 A9 AC 8D 30 02 A9 +     mwa #DL_pre dlptrs
-    19 270F A9 21		    lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
-    20 2711 8D 2F 02		    sta dmactls
-    21 2714 A9 00 8D C6 02	    mva #0 COLOR2
-    22 2719 8D 1A D0		    sta COLBAK
-    23 271C A9 0F 8D C5 02	    mva #15 COLOR1
-    24 2721 20 94 27		    jsr wait_for_releasing_keyz
-    25 				    
-    26 2724			leet_anim
-    27 				    ; test for going further
-    28 2724 AD 1F D0		    lda CONSOL
-    29 2727 C9 07		    cmp #7
-    30 2729 D0 65		    bne leet_end
-    31 				     ; check keyboard
-    32 272B AD 0F D2		    lda SKSTAT
-    33 272E C9 F7		    cmp #$f7    ; SHIFT
-    34 2730 F0 5E		    beq leet_end
-    35 2732 C9 FF		    cmp #$ff
-    36 2734 D0 5A		    bne leet_end
-    37 2736 AD 10 D0		    lda TRIG0
-    38 2739 F0 55		    beq leet_end   
-    39 				 
-    40 				 
-    41 273B A9 CC 85 80 A9 27 +     mwa #pre_screen temp_w
-    42 2743 A9 5C 85 85 A9 29 +     mwa #leet_screen temp_w3
-    43 274B A0 00		    ldy #0
-    44 				@
-    45 274D B1 80		    lda (temp_w),y
-    46 274F F0 20		    beq next_letter     ; ignore zeroes
-    47 				    ;is the letter leetable?
-    48 2751 C9 61		    cmp #"a"
-    49 2753 90 1C		    bcc next_letter
-    50 2755 C9 7B		    cmp #"z"+1
-    51 2757 B0 18		    bcs next_letter
-    52 				    ;letter is leetable
-    53 2759 F0 16		    beq next_letter
-    54 275B 38			    sec
-    55 275C E9 61		    sbc #"a"
-    56 275E A8			    tay     ;save the letter
-    57 275F AD 0A D2		    lda RANDOM
-    58 2762 29 03		    and #%00000011   ; 0-3
-    59 2764 AA			    tax
-    60 2765 BD 54 29		    lda leet_speeks_l,x
-    61 2768 85 83		    sta temp_w2
-    62 276A BD 58 29		    lda leet_speeks_h,x
-    63 276D 85 84		    sta temp_w2+1
-    64 276F B1 83		    lda (temp_w2),y
-    65 2771			next_letter
-    66 2771 A0 00		    ldy #0
-    67 2773 91 85		    sta (temp_w3),y
-    68 2775 E6 80 D0 02 E6 81	    inw temp_w
-    69 277B E6 85 D0 02 E6 86	    inw temp_w3
-    70 2781 A5 81 C9 28 D0 04 +     cpw temp_w #pre_screen_end
-    71 278B F0 97		    beq leet_anim
-    72 278D 4C 4D 27		    jmp @-
-    73
-    74 2790			leet_end
-    75 2790 20 94 27		    jsr wait_for_releasing_keyz
-    76 2793 60			    rts
-    77 				    
-    78
-    79 2794			.proc wait_for_releasing_keyz
-    80 2794 AD 1F D0		@   lda CONSOL
-    81 2797 C9 07		    cmp #7
-    82 2799 D0 F9		    bne @-
-    83 				     ; check keyboard
-    84 279B AD 0F D2		@   lda SKSTAT
-    85 279E C9 F7		    cmp #$f7    ; SHIFT
-    86 27A0 F0 F9		    beq @-
-    87 27A2 C9 FF		    cmp #$ff
-    88 27A4 D0 F5		    bne @-
-    89 27A6 AD 10 D0		@   lda TRIG0
-    90 27A9 F0 FB		    beq @-
-    91 27AB 60			    rts
-    92 				.endp
-    93
-    94 27AC			DL_pre
-    95 27AC 70 70 70 70 70 70 +     :8 .by SKIP8
-    96 27B4 42			    .by LMS+MODE2
-    97 27B5 5C 29		    .wo leet_screen
-    98 27B7 00 02		    .by SKIP1, MODE2
-    99 27B9 70			    .by SKIP8
-   100 27BA 00 02		    .by SKIP1, MODE2
-   101 27BC 70			    .by SKIP8
-   102 27BD 00 02 00 02 00 02 +     :6 .by SKIP1, MODE2
-   103 27C9 41			    .by JVB
-   104 27CA AC 27		    .wo DL_pre
-   105 27CC			pre_screen
-   106 				    ;    01234567890123456789012345678901"
-   107 27CC 74 68 69 73 00 6C +     dta "this little game was created in "
-   108 27EC 00 66 6F 75 72 00 +     dta " four evenings before SV2K24SE  "
-   109 280C 73 6F 72 72 79 00 +     dta "sorry for technical difficulties"
-   110 282C 63 6F 64 65 1A 00 +     dta "code:                           "
-   111 284C 00 00 00 00 00 00 +     dta "        pecus & pirx            "
-   112 286C 73 6F 75 6E 64 1A +     dta "sound:                          "
-   113 288C 00 00 00 00 00 00 +     dta "        alex, jochen hippel     "
-   114 28AC 67 66 78 1A 00 00 +     dta "gfx:                            "
-   115 28CC 00 00 00 00 00 00 +     dta "        alphabet, inc.          "
-   116 28EC			pre_screen_end
-   117 28EC			leet_speek1
-   118 28EC 61 62 63 64 65 66 +     dta "abcdefghijklmnopqrstuvwxyz"
-   119 2906			leet_speek2
-   120 2906 21 22 23 24 25 26 +     dta "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-   121 2920			leet_speek3
-   122 2920 14 06 3B 09 65 26 +     dta "4&[)eF9-|jk_mn0p@r57uvw*y2"
-   123 293A			leet_speek4
-   124 293A 3E 62 08 1E 5B 41 +     dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxy/"
-   125
-   126 2954			leet_speeks_l
-   127 2954 EC			    .by <leet_speek1
-   128 2955 06			    .by <leet_speek2
-   129 2956 20			    .by <leet_speek3
-   130 2957 3A			    .by <leet_speek4
-   131 2958			leet_speeks_h
-   132 2958 28			    .by >leet_speek1
-   133 2959 29			    .by >leet_speek2
-   134 295A 29			    .by >leet_speek3
-   135 295B 29			    .by >leet_speek4
-   136 295C			leet_screen 
-   137 = 295C			    .ds 32*9
-   138 2A7C			leet_screen_end 
-   139 02E2-02E3> 00 20		    ini $2000
-   140 				;---------------------------------------------------
+    15 				    org $2000
+    16 				PLAYER
+    17 				    icl '../music/playlzs16.asm'  ; Music Player
+Source: playlzs16.asm
+     1 				;
+     2 				; LZSS Compressed SAP player for 16 match bits
+     3 				; --------------------------------------------
+     4 				;
+     5 				; (c) 2020 DMSC
+     6 				; Code under MIT license, see LICENSE file.
+     7 				;
+     8 				; This player uses:
+     9 				;  Match length: 8 bits  (1 to 256)
+    10 				;  Match offset: 8 bits  (1 to 256)
+    11 				;  Min length: 2
+    12 				;  Total match bits: 16 bits
+    13 				;
+    14 				; Compress using:
+    15 				;  lzss -b 16 -o 8 -m 1 input.rsap test.lz12
+    16 				;
+    17 				; Assemble this file with MADS assembler, the compressed song is expected in
+    18 				; the `test.lz16` file at assembly time.
+    19 				;
+    20 				; The plater needs 256 bytes of buffer for each pokey register stored, for a
+    21 				; full SAP file this is 2304 bytes.
+    22 				;
+    23 				    org $e0
+    24 				    
+    25 = 00E0			song_start_ptr  .ds 2
+    26 = 00E2			song_end_ptr    .ds 2
+    27 = 00E4			chn_copy    .ds     9
+    28 = 00ED			chn_pos     .ds     9
+    29 = 00F6			bptr        .ds     2
+    30 = 00F8			cur_pos     .ds     1
+    31 = 00F9			chn_bits    .ds     1
+    32
+    33 = 00FA			bit_data    .ds     1
+    34
+    35
+    36
+    37 				;POKEY = $D200
+    38
+    39 				    org $2000
+    40
+    41
+    42 				;player
+    43 FFFF> 2000-20B3> 4C 56 +     jmp play_frame
+    44 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    45 				; Song Initialization - this runs in the first tick:
+    46 				;
+    47 2003			.proc init_song
+    48
+    49 				    ;clear buffers
+    50 2003 A9 00		    lda #0
+    51 2005 AA			    tax
+    52 				@
+    53 2006 9D 00 21 9D 00 22 +     :9 sta buffers+#*$100,x
+    54 2021 E8			    inx
+    55 2022 D0 E2		    bne @-
+    56 				    
+    57 2024 A9 01 85 FA		    mva #1 bit_data
+    58
+    59 				    ; here initializes song pointer:
+    60 2028 18 A5 E0 69 01 8D +     adw song_start_ptr #1 song_ptr
+    61
+    62 2037 A9 21 8D 4A 20	    mva #>(buffers+255) cbuf+2
+    63 				    ; Init all channels:
+    64 203C A2 08		    ldx #8
+    65 203E A0 00		    ldy #0
+    66 2040			clear
+    67 				    ; Read just init value and store into buffer and POKEY
+    68 2040 20 A8 20		    jsr get_byte
+    69 2043 9D 00 D2		    sta POKEY, x
+    70 2046 94 E4		    sty chn_copy, x
+    71 2048			cbuf
+    72 2048 8D FF 21		    sta buffers + 255
+    73 204B EE 4A 20		    inc cbuf + 2
+    74 204E CA			    dex
+    75 204F 10 EF		    bpl clear
+    76
+    77 				    ; Initialize buffer pointer:
+    78 2051 84 F6		    sty bptr
+    79 2053 84 F8		    sty cur_pos
+    80 2055 60			    rts
+    81 				.endp
+    82
+    83
+    84 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    85 				; Play one frame of the song
+    86 				;
+    87 2056			.proc play_frame
+    88 2056 A9 21		    lda #>buffers
+    89 2058 85 F7		    sta bptr+1
+    90
+    91 205A A0 00		    ldy #0
+    92 205C B1 E0		    lda (song_start_ptr),y
+    93 205E 85 F9		    sta chn_bits
+    94 2060 A2 08		    ldx #8
+    95
+    96 				    ; Loop through all "channels", one for each POKEY register
+    97 2062			chn_loop:
+    98 2062 46 F9		    lsr chn_bits
+    99 2064 B0 29		    bcs skip_chn       ; C=1 : skip this channel
+   100
+   101 2066 B5 E4		    lda chn_copy, x    ; Get status of this stream
+   102 2068 D0 16		    bne do_copy_byte   ; If > 0 we are copying bytes
+   103
+   104 				    ; We are decoding a new match/literal
+   105 206A 46 FA		    lsr bit_data       ; Get next bit
+   106 206C D0 06		    bne got_bit
+   107 206E 20 A8 20		    jsr get_byte       ; Not enough bits, refill!
+   108 2071 6A			    ror                ; Extract a new bit and add a 1 at the high bit (from C set above)
+   109 2072 85 FA		    sta bit_data       ;
+   110 2074			got_bit:
+   111 2074 20 A8 20		    jsr get_byte       ; Always read a byte, it could mean "match size/offset" or "literal byte"
+   112 2077 B0 0F		    bcs store          ; Bit = 1 is "literal", bit = 0 is "match"
+   113
+   114 2079 95 ED		    sta chn_pos, x     ; Store in "copy pos"
+   115
+   116 207B 20 A8 20		    jsr get_byte
+   117 207E 95 E4		    sta chn_copy, x    ; Store in "copy length"
+   118
+   119 				                        ; And start copying first byte
+   120 2080			do_copy_byte:
+   121 2080 D6 E4		    dec chn_copy, x     ; Decrease match length, increase match position
+   122 2082 F6 ED		    inc chn_pos, x
+   123 2084 B4 ED		    ldy chn_pos, x
+   124
+   125 				    ; Now, read old data, jump to data store
+   126 2086 B1 F6		    lda (bptr), y
+   127
+   128 2088			store:
+   129 2088 A4 F8		    ldy cur_pos
+   130 208A 9D 00 D2		    sta POKEY, x        ; Store to output and buffer
+   131 208D 91 F6		    sta (bptr), y
+   132
+   133 208F			skip_chn:
+   134 				    ; Increment channel buffer pointer
+   135 208F E6 F7		    inc bptr+1
+   136
+   137 2091 CA			    dex
+   138 2092 10 CE		    bpl chn_loop        ; Next channel
+   139
+   140 2094 E6 F8		    inc cur_pos
    141
-   142 				    org $3000
-   143 3000			screen
-   144 3000-98F4> FF FE FF F0 +     ins 'difficulties.bmp',+62
-   145 3410			DL
-   146 3410 70 70 70 70 70 70 +     :13 .by SKIP8
-   147 341D 4F			    .by MODEF+LMS
-   148 341E 00 30		    .wo screen
-   149 3420 0F 0F 0F 0F 0F 0F +     :25 .by MODEF
-   150 3439 41			    .by JVB
-   151 343A 10 34		    .wo DL
-   152 				    
-   153 343C			start
-   154 343C A9 10 8D 30 02 A9 +     mwa #DL dlptrs
-   155 3446 A9 3E		    lda #@dmactl(standard|dma|players|missiles|lineX1)  ; normal screen width, DL on, P/M on
-   156 3448 8D 2F 02		    sta dmactls
-   157 344B A9 00 8D C6 02	    mva #0 COLOR2
-   158 3450 8D 1A D0		    sta COLBAK
-   159 3453 A9 0F 8D C5 02	    mva #15 COLOR1
-   160 3458			    POKEY_INIT
+   142 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   143 				; Check for ending of song and jump to the next frame
+   144 				;
+   145 2096			check_end_song
+   146 2096 AD AA 20 C5 E3 D0 +     cpw song_ptr song_end_ptr
+   147 20A2 90 03 20 03 20	    scc:jsr init_song
+   148 20A7 60			    rts
+   149 				.endp
+   150 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   151 20A8			get_byte
+   152 20A8 AD FF FF		    lda song_ptr: $ffff  ;song_data+1
+   153 20AB EE A9 20 D0 03 EE +     inw song_ptr
+   154 20B3 60			    rts
+   155 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   156 				/* start
+   157 				    mwa #song_data song_start_ptr
+   158 				    mwa #song_end song_end_ptr
+   159 				    jsr init_song
+   160 				@
+   161 				    lda:cmp:req 20
+   162 				    jsr player
+   163 				    
+   164 				    lda $d01f ;consol
+   165 				    cmp #7
+   166 				    seq:jsr init_song
+   167 				    
+   168 				    jmp @-    */
+   168
+   169
+   170
+   171
+   172
+   173 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   174 20B4			    .align $100
+   175 2100			buffers
+   176 = 2100			    .ds 256 * 9
+   177
+   178 				;song_data
+   179 				;        ins     'InGame.lzss'
+   180 				;song_end
+   181
+   182
+   183 				;    run start
+   184
+    18 				;---------------------------------------------------
+    19 				    ; BASIC off
+    20 				    ORG $2c00
+    21 2C00			start1
+    22 2C00-2E61> A9 FF 8D 01 +     mva #$ff portb
+    23 2C05 A9 B2 8D 30 02 A9 +     mwa #DL_pre dlptrs
+    24 2C0F A9 21		    lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
+    25 2C11 8D 2F 02		    sta dmactls
+    26 2C14 A9 00 8D C6 02	    mva #0 COLOR2
+    27 2C19 8D 1A D0		    sta COLBAK
+    28 2C1C A9 0F 8D C5 02	    mva #15 COLOR1
+    29 2C21 20 9A 2C		    jsr wait_for_releasing_keyz
+    30 2C24 20 82 2F		    jsr PlayMusic
+    31 2C27			leet_anim
+    32 				    ; test for going further
+    33 2C27 AD 1F D0		    lda CONSOL
+    34 2C2A C9 07		    cmp #7
+    35 2C2C D0 65		    bne leet_end
+    36 				     ; check keyboard
+    37 2C2E AD 0F D2		    lda SKSTAT
+    38 2C31 C9 F7		    cmp #$f7    ; SHIFT
+    39 2C33 F0 5E		    beq leet_end
+    40 2C35 C9 FF		    cmp #$ff
+    41 2C37 D0 5A		    bne leet_end
+    42 2C39 AD 10 D0		    lda TRIG0
+    43 2C3C F0 55		    beq leet_end   
+    44 				 
+    45 				 
+    46 2C3E A9 D2 85 80 A9 2C +     mwa #pre_screen temp_w
+    47 2C46 A9 62 85 85 A9 2E +     mwa #leet_screen temp_w3
+    48 2C4E A0 00		    ldy #0
+    49 				@
+    50 2C50 B1 80		    lda (temp_w),y
+    51 2C52 F0 20		    beq next_letter     ; ignore zeroes
+    52 				    ;is the letter leetable?
+    53 2C54 C9 61		    cmp #"a"
+    54 2C56 90 1C		    bcc next_letter
+    55 2C58 C9 7B		    cmp #"z"+1
+    56 2C5A B0 18		    bcs next_letter
+    57 				    ;letter is leetable
+    58 2C5C F0 16		    beq next_letter
+    59 2C5E 38			    sec
+    60 2C5F E9 61		    sbc #"a"
+    61 2C61 A8			    tay     ;save the letter
+    62 2C62 AD 0A D2		    lda RANDOM
+    63 2C65 29 03		    and #%00000011   ; 0-3
+    64 2C67 AA			    tax
+    65 2C68 BD 5A 2E		    lda leet_speeks_l,x
+    66 2C6B 85 83		    sta temp_w2
+    67 2C6D BD 5E 2E		    lda leet_speeks_h,x
+    68 2C70 85 84		    sta temp_w2+1
+    69 2C72 B1 83		    lda (temp_w2),y
+    70 2C74			next_letter
+    71 2C74 A0 00		    ldy #0
+    72 2C76 91 85		    sta (temp_w3),y
+    73 2C78 E6 80 D0 02 E6 81	    inw temp_w
+    74 2C7E E6 85 D0 02 E6 86	    inw temp_w3
+    75 2C84 A5 81 C9 2D D0 04 +     cpw temp_w #pre_screen_end
+    76 2C8E F0 97		    beq leet_anim
+    77 2C90 4C 50 2C		    jmp @-
+    78
+    79 2C93			leet_end
+    80 2C93 20 9F 2F		    jsr StopMusic
+    81 2C96 20 9A 2C		    jsr wait_for_releasing_keyz
+    82 2C99 60			    rts
+    83 				    
+    84
+    85 2C9A			.proc wait_for_releasing_keyz
+    86 2C9A AD 1F D0		@   lda CONSOL
+    87 2C9D C9 07		    cmp #7
+    88 2C9F D0 F9		    bne @-
+    89 				     ; check keyboard
+    90 2CA1 AD 0F D2		@   lda SKSTAT
+    91 2CA4 C9 F7		    cmp #$f7    ; SHIFT
+    92 2CA6 F0 F9		    beq @-
+    93 2CA8 C9 FF		    cmp #$ff
+    94 2CAA D0 F5		    bne @-
+    95 2CAC AD 10 D0		@   lda TRIG0
+    96 2CAF F0 FB		    beq @-
+    97 2CB1 60			    rts
+    98 				.endp
+    99
+   100 2CB2			DL_pre
+   101 2CB2 70 70 70 70 70 70 +     :8 .by SKIP8
+   102 2CBA 42			    .by LMS+MODE2
+   103 2CBB 62 2E		    .wo leet_screen
+   104 2CBD 00 02		    .by SKIP1, MODE2
+   105 2CBF 70			    .by SKIP8
+   106 2CC0 00 02		    .by SKIP1, MODE2
+   107 2CC2 70			    .by SKIP8
+   108 2CC3 00 02 00 02 00 02 +     :6 .by SKIP1, MODE2
+   109 2CCF 41			    .by JVB
+   110 2CD0 B2 2C		    .wo DL_pre
+   111 2CD2			pre_screen
+   112 				    ;    01234567890123456789012345678901"
+   113 2CD2 74 68 69 73 00 6C +     dta "this little game was created in "
+   114 2CF2 00 66 6F 75 72 00 +     dta " four evenings before SV2K24SE  "
+   115 2D12 73 6F 72 72 79 00 +     dta "sorry for technical difficulties"
+   116 2D32 63 6F 64 65 1A 00 +     dta "code:                           "
+   117 2D52 00 00 00 00 00 00 +     dta "        pecus & pirx            "
+   118 2D72 73 6F 75 6E 64 1A +     dta "sound:                          "
+   119 2D92 00 00 00 00 00 00 +     dta "        alex, jochen hippel     "
+   120 2DB2 67 66 78 1A 00 00 +     dta "gfx:                            "
+   121 2DD2 00 00 00 00 00 00 +     dta "        alphabet, inc.          "
+   122 2DF2			pre_screen_end
+   123 2DF2			leet_speek1
+   124 2DF2 61 62 63 64 65 66 +     dta "abcdefghijklmnopqrstuvwxyz"
+   125 2E0C			leet_speek2
+   126 2E0C 21 22 23 24 25 26 +     dta "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+   127 2E26			leet_speek3
+   128 2E26 14 18 3B 09 65 26 +     dta "48[)eF9-|jk_mn0p@r57uvw*y2"
+   129 2E40			leet_speek4
+   130 2E40 3E 62 08 1E 5B 41 +     dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxy/"
+   131
+   132 2E5A			leet_speeks_l
+   133 2E5A F2			    .by <leet_speek1
+   134 2E5B 0C			    .by <leet_speek2
+   135 2E5C 26			    .by <leet_speek3
+   136 2E5D 40			    .by <leet_speek4
+   137 2E5E			leet_speeks_h
+   138 2E5E 2D			    .by >leet_speek1
+   139 2E5F 2E			    .by >leet_speek2
+   140 2E60 2E			    .by >leet_speek3
+   141 2E61 2E			    .by >leet_speek4
+   142 2E62			leet_screen 
+   143 = 2E62			    .ds 32*9
+   144 2F82			leet_screen_end
+   145 				;--------------------------------------------------
+   146 2F82			.proc PlayMusic
+   147 2F82-2FB1> A9 00 85 E0 +     mwa #MUSIC_DATA song_start_ptr
+   148 2F8A A9 7F 85 E2 A9 35 +     mwa #MUSIC_DATA_END song_end_ptr
+   149 2F92 20 03 20		    jsr init_song
+   150 2F95			    VMAIN VBLinterrupt,7       ; jsr SetVBL
+Macro: VMAIN [Source: MACRO.ASM]
+    15 2F95 A0 A9		         LDY # <VBLINTERRUPT
+    16 2F97 A2 2F		         LDX # >VBLINTERRUPT
+    17 2F99 A9 07		         LDA #7
+    18 2F9B 20 5C E4		         JSR SETVBV
+Source: tech_diff.asm
+   151 2F9E 60			    rts
+   152 				.endp
+   153 2F9F			.proc StopMusic
+   154 2F9F			    VMAIN XITVBV,7       ; jsr SetVBL
+Macro: VMAIN [Source: MACRO.ASM]
+    15 2F9F A0 62		         LDY # <XITVBV
+    16 2FA1 A2 E4		         LDX # >XITVBV
+    17 2FA3 A9 07		         LDA #7
+    18 2FA5 20 5C E4		         JSR SETVBV
+Source: tech_diff.asm
+   155 2FA8 60			    rts
+   156 				.endp
+   157 2FA9			.proc VBLinterrupt
+   158 2FA9 20 00 20		    jsr PLAYER
+   159 2FAC 68			    pla
+   160 2FAD A8			    tay
+   161 2FAE 68			    pla
+   162 2FAF AA			    tax
+   163 2FB0 68			    pla
+   164 2FB1 40			    rti
+   165 				.endp  
+   166 2FB2			    .align $100
+   167 3000			MUSIC_DATA
+   168 3000-357E> 00 04 88 00 +     ins '../music/Title.lzss'  ; title music
+   169 357F			MUSIC_DATA_END
+   170
+   171 02E2-02E3> 00 2C		    ini start1
+   172 				;---------------------------------------------------
+   173
+   174 				    org $3000
+   175 3000			screen
+   176 3000-98F4> FF FE FF F0 +     ins 'difficulties.bmp',+62
+   177 3410			DL
+   178 3410 70 70 70 70 70 70 +     :13 .by SKIP8
+   179 341D 4F			    .by MODEF+LMS
+   180 341E 00 30		    .wo screen
+   181 3420 0F 0F 0F 0F 0F 0F +     :25 .by MODEF
+   182 3439 41			    .by JVB
+   183 343A 10 34		    .wo DL
+   184 				    
+   185 343C			start
+   186 343C A9 10 8D 30 02 A9 +     mwa #DL dlptrs
+   187 3446 A9 3E		    lda #@dmactl(standard|dma|players|missiles|lineX1)  ; normal screen width, DL on, P/M on
+   188 3448 8D 2F 02		    sta dmactls
+   189 344B A9 00 8D C6 02	    mva #0 COLOR2
+   190 3450 8D 1A D0		    sta COLBAK
+   191 3453 A9 0F 8D C5 02	    mva #15 COLOR1
+   192 3458			    POKEY_INIT
 Macro: POKEY_INIT [Source: MACRO.ASM]
      2 3458 A9 00 8D 08 D2	      mva #0 AUDCTL
      3 345D A9 03 8D 0F D2	      mva #3 SKSTAT
 Source: tech_diff.asm
-   161 3462			    pause 3
+   193 3462			    pause 3
 Macro: PAUSE [Source: MACRO.ASM]
      2 3462 A2 03		      ldx #3
      3 3464			?PAUSELOOP
@@ -1097,157 +1327,157 @@ Source: tech_diff.asm
      5 3477 CA			      dex
      6 3478 D0 EA		      bne ?PAUSELOOP
 Source: tech_diff.asm
-   162 347A A9 00		    lda #0
-   163 347C 8D 0E D4		    sta $d40e   ; NMI OFF 
-   164 347F 78			    sei         ; IRQ OFF
-   165 				    
-   166 				    
-   167 				    ;-----playa-da-sampla-----
-   168 3480 A2 00		    ldx #0
-   169
-   170 3482			please_wait_loop    
-   171 3482 BD C9 98		    lda samples_l,x
-   172 3485 8D 99 34		    sta sample_load
-   173 3488 BD D4 98		    lda samples_h,x
-   174 348B 8D 9A 34		    sta sample_load+1
-   175 				    
-   176 348E BD DF 98		    lda samples_end_l,x
-   177 3491 85 80		    sta temp_w
-   178 3493 BD EA 98		    lda samples_end_h,x
-   179 3496 85 81		    sta temp_w+1
-   180 				    
-   181 				@    
-   182 3498 AD FF FF		    lda sample_load: $ffff
-   183 349B A8			    tay
-   184 349C 38			    sec
-   185 349D 6A 6A 6A 6A		    :4 ror
-   186 34A1 8D 01 D2		    sta AUDC1
-   187 34A4 8D 03 D2		    sta AUDC2
-   188 34A7 8D 05 D2		    sta AUDC3
-   189 				    ;sta AUDC4
-   190 34AA 8D 0A D4		    sta wsync ;------------
-   191 				       ; test for going further
-   192 34AD AD 1F D0		    lda CONSOL
-   193 34B0 C9 07		    cmp #7
-   194 34B2 D0 50		    bne exit_tech_diff
-   195 				     ; check keyboard
-   196 34B4 AD 0F D2		    lda SKSTAT
-   197 34B7 C9 F7		    cmp #$f7    ; SHIFT
-   198 34B9 F0 49		    beq exit_tech_diff
-   199 34BB C9 FF		    cmp #$ff
-   200 34BD D0 45		    bne exit_tech_diff
-   201 34BF 8D 0A D4		    sta wsync ;------------
-   202 34C2 AD 10 D0		    lda TRIG0
-   203 34C5 F0 3D		    beq exit_tech_diff   
-   204 34C7 8D 0A D4		    sta wsync ;------------
-   205
-   206 34CA 98			    tya
-   207 34CB 29 0F		    and #$0F
-   208 34CD 09 10		    ora #$10
-   209 34CF 8D 01 D2		    sta AUDC1
-   210 34D2 8D 03 D2		    sta AUDC2
-   211 34D5 8D 05 D2		    sta AUDC3
-   212 				    ;sta AUDC4
-   213
-   214
-   215 34D8 EE 99 34 D0 03 EE +     inw sample_load
-   216 34E0 8D 0A D4		    sta wsync
-   217 34E3 AD 9A 34 C5 81 D0 +     cpw sample_load temp_w
-   218 34EF 8D 0A D4		    sta wsync
-   219 34F2 F0 06		    beq @+
-   220 34F4 8D 0A D4		    sta wsync
-   221 34F7 4C 98 34		    jmp @-    
-   222 				@
-   223 34FA E8			    inx
-   224 34FB E0 0B		    cpx #11
-   225 34FD D0 02 A2 01		    sne:ldx #1
-   226 3501 4C 82 34		    jmp please_wait_loop
-   227
-   228 3504			exit_tech_diff
-   229 				    ; wait for releasing keyz
-   230 3504 AD 1F D0		@   lda CONSOL
-   231 3507 C9 07		    cmp #7
-   232 3509 D0 F9		    bne @-
-   233 				     ; check keyboard
-   234 350B AD 0F D2		@   lda SKSTAT
-   235 350E C9 F7		    cmp #$f7    ; SHIFT
-   236 3510 F0 F9		    beq @-
-   237 3512 C9 FF		    cmp #$ff
-   238 3514 D0 F5		    bne @-
-   239 3516 AD 10 D0		@   lda TRIG0
-   240 3519 F0 FB		    beq @-
-   241 				    
-   242 				;
-   243 351B A9 40		    lda #$40
-   244 351D 8D 0E D4		    sta $d40e   ; NMI On 
-   245 3520 58			    cli         ; IRQ on
-   246 3521 A9 00 8D 2F 02	    mva #0 DMACTLS
-   247 3526 8D 00 D4		    sta dmactl
-   248 3529 60			    rts 
-   249 				 
-   250 352A			sample1
-   251 352A 57 77 77 77 77 77 +     ins 'wait1.wav.bin'
-   252 4896			sample_end1
-   253 4896			sample2
-   254 4896 43 33 33 33 33 33 +     ins 'wait2.wav.bin'
-   255 6B7B			sample_end2
-   256 6B7B			sample3
-   257 6B7B 32 22 22 22 22 22 +     ins 'wait3.wav.bin'
-   258 6E15			sample_end3
-   259 6E15			sample4
-   260 6E15 56 66 66 66 66 66 +     ins 'wait4.wav.bin'
-   261 70AF			sample_end4
-   262 70AF			sample5
-   263 70AF 57 67 67 67 67 67 +     ins 'wait5.wav.bin'
-   264 98C9			sample_end5
-   265
-   266 98C9			samples_l
-   267 98C9 2A			    .by <sample1
-   268 98CA 96			    .by <sample2
-   269 98CB 7B			    .by <sample3
-   270 98CC 96			    .by <sample2
-   271 98CD 15			    .by <sample4
-   272 98CE 96			    .by <sample2
-   273 98CF AF			    .by <sample5
-   274 98D0 96			    .by <sample2
-   275 98D1 7B			    .by <sample3
-   276 98D2 96			    .by <sample2
-   277 98D3 15			    .by <sample4
-   278 98D4			samples_h
-   279 98D4 35			    .by >sample1
-   280 98D5 48			    .by >sample2
-   281 98D6 6B			    .by >sample3
-   282 98D7 48			    .by >sample2
-   283 98D8 6E			    .by >sample4
-   284 98D9 48			    .by >sample2
-   285 98DA 70			    .by >sample5
-   286 98DB 48			    .by >sample2
-   287 98DC 6B			    .by >sample3
-   288 98DD 48			    .by >sample2
-   289 98DE 6E			    .by >sample4
-   290 98DF			samples_end_l
-   291 98DF 96			    .by <sample_end1
-   292 98E0 7B			    .by <sample_end2
-   293 98E1 15			    .by <sample_end3
-   294 98E2 7B			    .by <sample_end2
-   295 98E3 AF			    .by <sample_end4
-   296 98E4 7B			    .by <sample_end2
-   297 98E5 C9			    .by <sample_end5
-   298 98E6 7B			    .by <sample_end2
-   299 98E7 15			    .by <sample_end3
-   300 98E8 7B			    .by <sample_end2
-   301 98E9 AF			    .by <sample_end4
-   302 98EA			samples_end_h
-   303 98EA 48			    .by >sample_end1
-   304 98EB 6B			    .by >sample_end2
-   305 98EC 6E			    .by >sample_end3
-   306 98ED 6B			    .by >sample_end2
-   307 98EE 70			    .by >sample_end4
-   308 98EF 6B			    .by >sample_end2
-   309 98F0 98			    .by >sample_end5
-   310 98F1 6B			    .by >sample_end2
-   311 98F2 6E			    .by >sample_end3
-   312 98F3 6B			    .by >sample_end2
-   313 98F4 70			    .by >sample_end4
-   314 98F5			finito
-   315 02E2-02E3> 3C 34		    ini start
+   194 347A A9 00		    lda #0
+   195 347C 8D 0E D4		    sta $d40e   ; NMI OFF 
+   196 347F 78			    sei         ; IRQ OFF
+   197 				    
+   198 				    
+   199 				    ;-----playa-da-sampla-----
+   200 3480 A2 00		    ldx #0
+   201
+   202 3482			please_wait_loop    
+   203 3482 BD C9 98		    lda samples_l,x
+   204 3485 8D 99 34		    sta sample_load
+   205 3488 BD D4 98		    lda samples_h,x
+   206 348B 8D 9A 34		    sta sample_load+1
+   207 				    
+   208 348E BD DF 98		    lda samples_end_l,x
+   209 3491 85 80		    sta temp_w
+   210 3493 BD EA 98		    lda samples_end_h,x
+   211 3496 85 81		    sta temp_w+1
+   212 				    
+   213 				@    
+   214 3498 AD FF FF		    lda sample_load: $ffff
+   215 349B A8			    tay
+   216 349C 38			    sec
+   217 349D 6A 6A 6A 6A		    :4 ror
+   218 34A1 8D 01 D2		    sta AUDC1
+   219 34A4 8D 03 D2		    sta AUDC2
+   220 34A7 8D 05 D2		    sta AUDC3
+   221 				    ;sta AUDC4
+   222 34AA 8D 0A D4		    sta wsync ;------------
+   223 				       ; test for going further
+   224 34AD AD 1F D0		    lda CONSOL
+   225 34B0 C9 07		    cmp #7
+   226 34B2 D0 50		    bne exit_tech_diff
+   227 				     ; check keyboard
+   228 34B4 AD 0F D2		    lda SKSTAT
+   229 34B7 C9 F7		    cmp #$f7    ; SHIFT
+   230 34B9 F0 49		    beq exit_tech_diff
+   231 34BB C9 FF		    cmp #$ff
+   232 34BD D0 45		    bne exit_tech_diff
+   233 34BF 8D 0A D4		    sta wsync ;------------
+   234 34C2 AD 10 D0		    lda TRIG0
+   235 34C5 F0 3D		    beq exit_tech_diff   
+   236 34C7 8D 0A D4		    sta wsync ;------------
+   237
+   238 34CA 98			    tya
+   239 34CB 29 0F		    and #$0F
+   240 34CD 09 10		    ora #$10
+   241 34CF 8D 01 D2		    sta AUDC1
+   242 34D2 8D 03 D2		    sta AUDC2
+   243 34D5 8D 05 D2		    sta AUDC3
+   244 				    ;sta AUDC4
+   245
+   246
+   247 34D8 EE 99 34 D0 03 EE +     inw sample_load
+   248 34E0 8D 0A D4		    sta wsync
+   249 34E3 AD 9A 34 C5 81 D0 +     cpw sample_load temp_w
+   250 34EF 8D 0A D4		    sta wsync
+   251 34F2 F0 06		    beq @+
+   252 34F4 8D 0A D4		    sta wsync
+   253 34F7 4C 98 34		    jmp @-    
+   254 				@
+   255 34FA E8			    inx
+   256 34FB E0 0B		    cpx #11
+   257 34FD D0 02 A2 01		    sne:ldx #1
+   258 3501 4C 82 34		    jmp please_wait_loop
+   259
+   260 3504			exit_tech_diff
+   261 				    ; wait for releasing keyz
+   262 3504 AD 1F D0		@   lda CONSOL
+   263 3507 C9 07		    cmp #7
+   264 3509 D0 F9		    bne @-
+   265 				     ; check keyboard
+   266 350B AD 0F D2		@   lda SKSTAT
+   267 350E C9 F7		    cmp #$f7    ; SHIFT
+   268 3510 F0 F9		    beq @-
+   269 3512 C9 FF		    cmp #$ff
+   270 3514 D0 F5		    bne @-
+   271 3516 AD 10 D0		@   lda TRIG0
+   272 3519 F0 FB		    beq @-
+   273 				    
+   274 				;
+   275 351B A9 40		    lda #$40
+   276 351D 8D 0E D4		    sta $d40e   ; NMI On 
+   277 3520 58			    cli         ; IRQ on
+   278 3521 A9 00 8D 2F 02	    mva #0 DMACTLS
+   279 3526 8D 00 D4		    sta dmactl
+   280 3529 60			    rts 
+   281 				 
+   282 352A			sample1
+   283 352A 57 77 77 77 77 77 +     ins 'wait1.wav.bin'
+   284 4896			sample_end1
+   285 4896			sample2
+   286 4896 43 33 33 33 33 33 +     ins 'wait2.wav.bin'
+   287 6B7B			sample_end2
+   288 6B7B			sample3
+   289 6B7B 32 22 22 22 22 22 +     ins 'wait3.wav.bin'
+   290 6E15			sample_end3
+   291 6E15			sample4
+   292 6E15 56 66 66 66 66 66 +     ins 'wait4.wav.bin'
+   293 70AF			sample_end4
+   294 70AF			sample5
+   295 70AF 57 67 67 67 67 67 +     ins 'wait5.wav.bin'
+   296 98C9			sample_end5
+   297
+   298 98C9			samples_l
+   299 98C9 2A			    .by <sample1
+   300 98CA 96			    .by <sample2
+   301 98CB 7B			    .by <sample3
+   302 98CC 96			    .by <sample2
+   303 98CD 15			    .by <sample4
+   304 98CE 96			    .by <sample2
+   305 98CF AF			    .by <sample5
+   306 98D0 96			    .by <sample2
+   307 98D1 7B			    .by <sample3
+   308 98D2 96			    .by <sample2
+   309 98D3 15			    .by <sample4
+   310 98D4			samples_h
+   311 98D4 35			    .by >sample1
+   312 98D5 48			    .by >sample2
+   313 98D6 6B			    .by >sample3
+   314 98D7 48			    .by >sample2
+   315 98D8 6E			    .by >sample4
+   316 98D9 48			    .by >sample2
+   317 98DA 70			    .by >sample5
+   318 98DB 48			    .by >sample2
+   319 98DC 6B			    .by >sample3
+   320 98DD 48			    .by >sample2
+   321 98DE 6E			    .by >sample4
+   322 98DF			samples_end_l
+   323 98DF 96			    .by <sample_end1
+   324 98E0 7B			    .by <sample_end2
+   325 98E1 15			    .by <sample_end3
+   326 98E2 7B			    .by <sample_end2
+   327 98E3 AF			    .by <sample_end4
+   328 98E4 7B			    .by <sample_end2
+   329 98E5 C9			    .by <sample_end5
+   330 98E6 7B			    .by <sample_end2
+   331 98E7 15			    .by <sample_end3
+   332 98E8 7B			    .by <sample_end2
+   333 98E9 AF			    .by <sample_end4
+   334 98EA			samples_end_h
+   335 98EA 48			    .by >sample_end1
+   336 98EB 6B			    .by >sample_end2
+   337 98EC 6E			    .by >sample_end3
+   338 98ED 6B			    .by >sample_end2
+   339 98EE 70			    .by >sample_end4
+   340 98EF 6B			    .by >sample_end2
+   341 98F0 98			    .by >sample_end5
+   342 98F1 6B			    .by >sample_end2
+   343 98F2 6E			    .by >sample_end3
+   344 98F3 6B			    .by >sample_end2
+   345 98F4 70			    .by >sample_end4
+   346 98F5			finito
+   347 02E2-02E3> 3C 34		    ini start

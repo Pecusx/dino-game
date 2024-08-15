@@ -34,19 +34,18 @@ bit_data    .ds     1
 
 
 
-POKEY = $D200
+;POKEY = $D200
 
     org $2000
 
 
-player
+;player
     jmp play_frame
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Song Initialization - this runs in the first tick:
 ;
 .proc init_song
 
-    mva #>(buffers+255) cbuf+1
     ;clear buffers
     lda #0
     tax
@@ -60,6 +59,7 @@ player
     ; here initializes song pointer:
     adw song_start_ptr #1 song_ptr
 
+    mva #>(buffers+255) cbuf+2
     ; Init all channels:
     ldx #8
     ldy #0
@@ -153,7 +153,7 @@ get_byte
     inw song_ptr
     rts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-start
+/* start
     mwa #song_data song_start_ptr
     mwa #song_end song_end_ptr
     jsr init_song
@@ -165,7 +165,7 @@ start
     cmp #7
     seq:jsr init_song
     
-    jmp @-   
+    jmp @-    */
 
 
 
@@ -175,10 +175,10 @@ start
 buffers
     .ds 256 * 9
 
-song_data
-        ins     'InGame.lzss'
-song_end
+;song_data
+;        ins     'InGame.lzss'
+;song_end
 
 
-    run start
+;    run start
 

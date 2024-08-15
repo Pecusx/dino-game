@@ -12,8 +12,13 @@
     icl '../lib/ATARISYS.ASM'
     icl '../lib/MACRO.ASM'
 ;---------------------------------------------------
+    org $2000
+PLAYER
+    icl '../music/playlzs16.asm'  ; Music Player
+;---------------------------------------------------
     ; BASIC off
     ORG $2c00
+start1
     mva #$ff portb
     mwa #DL_pre dlptrs
     lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
@@ -22,7 +27,7 @@
     sta COLBAK
     mva #15 COLOR1
     jsr wait_for_releasing_keyz
-    
+    jsr PlayMusic
 leet_anim
     ; test for going further
     lda CONSOL
@@ -72,6 +77,7 @@ next_letter
     jmp @-
 
 leet_end
+    jsr StopMusic
     jsr wait_for_releasing_keyz
     rts
     
@@ -135,8 +141,34 @@ leet_speeks_h
     .by >leet_speek4
 leet_screen 
     .ds 32*9
-leet_screen_end 
-    ini $2000
+leet_screen_end
+;--------------------------------------------------
+.proc PlayMusic
+    mwa #MUSIC_DATA song_start_ptr
+    mwa #MUSIC_DATA_END song_end_ptr
+    jsr init_song
+    VMAIN VBLinterrupt,7       ; jsr SetVBL
+    rts
+.endp
+.proc StopMusic
+    VMAIN XITVBV,7       ; jsr SetVBL
+    rts
+.endp
+.proc VBLinterrupt
+    jsr PLAYER
+    pla
+    tay
+    pla
+    tax
+    pla
+    rti
+.endp  
+    .align $100
+MUSIC_DATA
+    ins '../music/Title.lzss'  ; title music
+MUSIC_DATA_END
+
+    ini start1
 ;---------------------------------------------------
 
     org $3000
