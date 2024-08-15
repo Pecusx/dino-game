@@ -176,7 +176,7 @@ buffers
     .ds 256 * 9
 
 song_data
-        ins     'ingame.lzss'
+        ins     'InGame.lzss'
 song_end
 
 
