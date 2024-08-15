@@ -46,6 +46,7 @@ player
 ;
 .proc init_song
 
+    mva #>(buffers+255) cbuf+1
     ;clear buffers
     lda #0
     tax
@@ -149,8 +150,7 @@ check_end_song
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 get_byte
     lda song_ptr: $ffff  ;song_data+1
-    inc song_ptr
-    sne:inc song_ptr+1
+    inw song_ptr
     rts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 start
