@@ -13,7 +13,7 @@
     icl '../lib/MACRO.ASM'
 ;---------------------------------------------------
     ; BASIC off
-    ORG $2700
+    ORG $2c00
     mva #$ff portb
     mwa #DL_pre dlptrs
     lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
@@ -119,7 +119,7 @@ leet_speek1
 leet_speek2
     dta "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 leet_speek3
-    dta "4&[)eF9-|jk_mn0p@r57uvw*y2"
+    dta "48[)eF9-|jk_mn0p@r57uvw*y2"
 leet_speek4
     dta "^b(>",$5b,$41,"gh1",$4c+$80,"k",$4b+$80,"M\",$54,$49+$80,"q",$51,"5",$57,"uvwxy/"
 

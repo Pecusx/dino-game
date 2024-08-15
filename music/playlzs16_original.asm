@@ -20,44 +20,48 @@
 ; The plater needs 256 bytes of buffer for each pokey register stored, for a
 ; full SAP file this is 2304 bytes.
 ;
-    org $e0
-    
-song_start_ptr  .ds 2
-song_end_ptr    .ds 2
+    org $80
+
 chn_copy    .ds     9
 chn_pos     .ds     9
 bptr        .ds     2
 cur_pos     .ds     1
 chn_bits    .ds     1
 
-bit_data    .ds     1
+bit_data    .byte   1
 
+.proc get_byte
+    lda song_data+1
+    inc song_ptr
+    bne skip
+    inc song_ptr+1
+skip
+    rts
+.endp
+song_ptr = get_byte + 1
 
 
 POKEY = $D200
 
     org $2000
+buffers
+    .ds 256 * 9
+
+song_data
+        ins     'test.lz16'
+song_end
 
 
-player
-    jmp play_frame
+start
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Song Initialization - this runs in the first tick:
 ;
 .proc init_song
 
-    ;clear buffers
-    lda #0
-    tax
-@
-    :9 sta buffers+#*$100,x
-    inx
-    bne @-
-    
-    mva #1 bit_data
-
-    ; here initializes song pointer:
-    adw song_start_ptr #1 song_ptr
+    ; Example: here initializes song pointer:
+    ; sta song_ptr
+    ; stx song_ptr + 1
 
     ; Init all channels:
     ldx #8
@@ -76,9 +80,18 @@ cbuf
     ; Initialize buffer pointer:
     sty bptr
     sty cur_pos
-    rts
 .endp
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Wait for next frame
+;
+.proc wait_frame
+
+    lda 20
+delay
+    cmp 20
+    beq delay
+.endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Play one frame of the song
@@ -87,8 +100,7 @@ cbuf
     lda #>buffers
     sta bptr+1
 
-    ldy #0
-    lda (song_start_ptr),y
+    lda song_data
     sta chn_bits
     ldx #8
 
@@ -137,42 +149,22 @@ skip_chn:
     bpl chn_loop        ; Next channel
 
     inc cur_pos
+.endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Check for ending of song and jump to the next frame
 ;
-check_end_song
-    cpw song_ptr song_end_ptr
-    scc:jsr init_song
-    rts
+.proc check_end_song
+    lda song_ptr + 1
+    cmp #>song_end
+    bne wait_frame
+    lda song_ptr
+    cmp #<song_end
+    bne wait_frame
 .endp
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-get_byte
-    lda song_ptr: $ffff  ;song_data+1
-    inc song_ptr
-    sne:inc song_ptr+1
+
+end_loop
     rts
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-start
-    mwa #song_data song_start_ptr
-    mwa #song_end song_end_ptr
-    jsr init_song
-@
-    lda:cmp:req 20
-    jsr player
-    jmp @-   
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    .align $100
-buffers
-    .ds 256 * 9
-
-song_data
-        ins     'ingame.lzss'
-song_end
 
 
     run start
