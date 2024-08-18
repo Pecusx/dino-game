@@ -12,11 +12,18 @@
     icl '../lib/ATARISYS.ASM'
     icl '../lib/MACRO.ASM'
 ;---------------------------------------------------
+        ;BASIC OFF
+        ORG $3000
+        mva #0 dmactls      ; dark screen
+        ; and wait one frame :)
+        waitRTC
+        mva #$ff portb      ; BASIC off
+        rts
+        ini $3000
     org $2000
 PLAYER
     icl '../music/playlzs16.asm'  ; Music Player
 ;---------------------------------------------------
-    ; BASIC off
     ORG $2c00
 start1
     mva #$ff portb
@@ -139,9 +146,6 @@ leet_speeks_h
     .by >leet_speek2
     .by >leet_speek3
     .by >leet_speek4
-leet_screen 
-    .ds 32*9
-leet_screen_end
 ;--------------------------------------------------
 .proc PlayMusic
     mwa #MUSIC_DATA song_start_ptr
@@ -152,20 +156,25 @@ leet_screen_end
 .endp
 .proc StopMusic
     VMAIN XITVBV,7       ; jsr SetVBL
+    waitRTC
+    ldx #8
+    lda #0
+@   sta POKEY,x
+    sta POKEY+$10,x
+    dex
+    bpl @-
     rts
 .endp
 .proc VBLinterrupt
     jsr PLAYER
-    pla
-    tay
-    pla
-    tax
-    pla
-    rti
+    jmp XITVBV
 .endp  
+leet_screen 
+    .ds 32*9
+leet_screen_end
     .align $100
 MUSIC_DATA
-    ins '../music/Title.lzss'  ; title music
+    ins '../music/title.lzss'  ; title music
 MUSIC_DATA_END
 
     ini start1
@@ -189,7 +198,11 @@ start
     mva #0 COLOR2
     sta COLBAK
     mva #15 COLOR1
-    POKEY_INIT
+    ;POKEY_INIT
+      mva #0 AUDCTL
+      sta AUDCTL+$10
+      mva #3 SKSTAT
+      sta SKSTAT+$10
     pause 3
     lda #0
     sta $d40e   ; NMI OFF 
@@ -232,15 +245,15 @@ please_wait_loop
     bne exit_tech_diff
     sta wsync ;------------
     lda TRIG0
-    beq exit_tech_diff   
+    beq exit_tech_diff 
     sta wsync ;------------
 
     tya
     and #$0F
     ora #$10
-    sta AUDC1
-    sta AUDC2
-    sta AUDC3
+    sta AUDC1+$10   ;pseudo stereo
+    sta AUDC2+$10
+    sta AUDC3+$10
     ;sta AUDC4
 
 
@@ -250,11 +263,12 @@ please_wait_loop
     sta wsync
     beq @+
     sta wsync
+    
     jmp @-    
 @
     inx
-    cpx #11
-    sne:ldx #1
+    cpx #11     ; track length
+    sne:ldx #1  ; jump to second sample
     jmp please_wait_loop
 
 exit_tech_diff
@@ -277,8 +291,17 @@ exit_tech_diff
     cli         ; IRQ on
     mva #0 DMACTLS
     sta dmactl
-    rts 
+    ;jmp quiet   ; rts
  
+.proc quiet
+    ldx #8
+    lda #0
+@   sta POKEY,x
+    sta POKEY+$10,x
+    dex
+    bpl @-
+    rts
+.endp
 sample1
     ins 'wait1.wav.bin'
 sample_end1

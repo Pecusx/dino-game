@@ -31,6 +31,9 @@ swap_table=$0600    ; table for swap bytes in left characters :)
 ;---------------------------------------------------
     .IF ALONE =1
         ; dark screean and BASIC off
+        org $2000
+PLAYER
+        icl 'music/playlzs16.asm'  ; Music Player
         ORG $3000
         mva #0 dmactls             ; dark screen
         mva #$ff portb
@@ -39,12 +42,22 @@ swap_table=$0600    ; table for swap bytes in left characters :)
         mva #$ff portb        ; BASIC off
         rts
         ini $3000
+    .else
+        PLAYER = $2000
+        INIT_SONG = PLAYER+3
+        org $e0
+song_start_ptr  .ds 2
+song_end_ptr    .ds 2
+chn_copy    .ds     9
+chn_pos     .ds     9
+bptr        .ds     2
+cur_pos     .ds     1
+chn_bits    .ds     1
+
+bit_data    .ds     1
+
     .ENDIF
 ;---------------------------------------------------
-    org $2000
-PLAYER
-    icl 'music/playlzs16.asm'  ; Music Player
-
     org $3000
 PMgraph
     org PMGraph+$800    ; P/M graphics for clouds

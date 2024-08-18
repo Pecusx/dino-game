@@ -54,6 +54,12 @@ bit_data    .ds     1
     inx
     bne @-
     
+    ;clear pokey_save
+    ldx #8
+@   sta pokey_save,x
+    dex
+    bpl @-
+    
     mva #1 bit_data
 
     ; here initializes song pointer:
@@ -85,6 +91,13 @@ cbuf
 ; Play one frame of the song
 ;
 .proc play_frame
+    ; play old frame on second pokey
+    ldx #8
+@   lda pokey_save,x
+    sta POKEY+$10,x
+    dex
+    bpl @-
+    
     lda #>buffers
     sta bptr+1
 
@@ -128,6 +141,7 @@ do_copy_byte:
 store:
     ldy cur_pos
     sta POKEY, x        ; Store to output and buffer
+    sta pokey_save,x
     sta (bptr), y
 
 skip_chn:
@@ -168,7 +182,8 @@ get_byte
     jmp @-    */
 
 
-
+pokey_save
+    .ds 9
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     .align $100
