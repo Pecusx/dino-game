@@ -137,6 +137,7 @@ NewGame
     jsr SetStatusToR
     jsr SetStart        
     jsr WorldToScreen
+    mva #>font4 chbas
     jsr FadeColorsIN
     jsr PlayInGameMusic
     jsr GameR
@@ -148,6 +149,7 @@ NewGame
     jsr SetStatusToL
     jsr SetStart        
     jsr WorldToScreen
+    mva #>font4l chbas
     jsr FadeColorsIN
     jsr PlayInGameMusic
     jsr GameL
