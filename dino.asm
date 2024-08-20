@@ -30,11 +30,11 @@ swap_table=$0600    ; table for swap bytes in left characters :)
     icl 'lib/MACRO.ASM'
 ;---------------------------------------------------
     .IF ALONE =1
-        ; dark screean and BASIC off
         org $2000
 PLAYER
         icl 'music/playlzs16.asm'  ; Music Player
         ORG $3000
+        ; dark screean and BASIC off
         mva #0 dmactls             ; dark screen
         mva #$ff portb
         ; and wait one frame :)

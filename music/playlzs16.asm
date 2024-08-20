@@ -45,7 +45,12 @@ bit_data    .ds     1
 ; Song Initialization - this runs in the first tick:
 ;
 .proc init_song
-
+    ;POKEY_INIT
+      mva #0 AUDCTL
+      sta AUDCTL+$10
+      mva #3 SKSTAT
+      sta SKSTAT+$10
+      
     ;clear buffers
     lda #0
     tax
@@ -53,12 +58,6 @@ bit_data    .ds     1
     :9 sta buffers+#*$100,x
     inx
     bne @-
-    
-    ;clear pokey_save
-    ldx #8
-@   sta pokey_save,x
-    dex
-    bpl @-
     
     mva #1 bit_data
 
@@ -73,6 +72,7 @@ clear
     ; Read just init value and store into buffer and POKEY
     jsr get_byte
     sta POKEY, x
+    sta pokey_save,x
     sty chn_copy, x
 cbuf
     sta buffers + 255
