@@ -26,6 +26,11 @@ PLAYER
 ;---------------------------------------------------
     ORG $2c00
 start1
+    ;POKEY_INIT
+      mva #0 AUDCTL
+      sta AUDCTL+$10
+      mva #3 SKSTAT
+      sta SKSTAT+$10
     mva #$ff portb
     mwa #DL_pre dlptrs
     lda #@dmactl(narrow|dma)  ; narrow screen width, DL on
