@@ -24,6 +24,7 @@ swap_table=$0600    ; table for swap bytes in left characters :)
     .zpvar JumpPhase        .byte
     .zpvar Hit              .byte
     .zpvar Level            .byte
+    .zpvar PaddleState      .byte
     .zpvar play_flag        .byte
     .zpvar NTSCounter       .byte
 ;---------------------------------------------------
@@ -132,6 +133,8 @@ FirstSTART
         mva #$ff portb
         ; and wait one frame :)
         waitRTC                   ; or waitRTC ?
+    jsr Check2button    ; reset JoyB2+ state
+    sta PaddleState
     jsr ClearScreen
     jsr GenerateCharsets
     jsr GenerateClouds
@@ -1080,6 +1083,8 @@ DinoLoop4
     beq Up
     lda TRIG0   ; Fire = Up
     beq Up
+    jsr Check2button    ; 2nd button = down
+    bcc Down
     ; check keyboard
     lda SKSTAT
     cmp #$f7    ; SHIFT
@@ -1326,6 +1331,13 @@ pressed
     beq @-
     rts   
 .endp
+;--------------------------------------------------
+Check2button
+    lda PADDL0
+    and #$c0
+    eor #$C0
+    cmp PaddleState
+    rts
 ;--------------------------------------------------
 .proc PrepareMusicPlayer
     jsr StopMusic
