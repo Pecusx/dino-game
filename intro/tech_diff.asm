@@ -23,8 +23,11 @@
         ini $3000
     org $2000
 PLAYER
-    icl '../music/playlzs16.asm'  ; Music Player
+    icl '../music/playlzs16.asm'  ; Music Player, dmsc lzss
 ;---------------------------------------------------
+leet_screen = $a000         ; further than samples
+leet_screen_end = leet_screen + 32*9
+
     ORG $2c00
 start1
     mva #$ff portb
@@ -85,11 +88,20 @@ next_letter
     jmp @-
 
 leet_end
+    ; normal (not leeted) text back
+    mwa #pre_screen temp_w
+    mwa #leet_screen temp_w3
+    ldy #0
+@
+    lda (temp_w),y
+    sta (temp_w3),y
+    inw temp_w
+    inw temp_w3
+    cpw temp_w #pre_screen_end
+    bne @-
+
     jsr StopMusic
     jsr wait_for_releasing_keyz
-        mva #0 dmactls      ; dark screen
-        ; and wait one frame :)
-        waitRTC
     rts
     
 
@@ -187,10 +199,7 @@ IsPAL
     jsr PLAYER
 NoMusic
     jmp XITVBV
-.endp  
-leet_screen 
-    .ds 32*9
-leet_screen_end
+.endp
     .align $100
 MUSIC_DATA
     ins '../music/title.lzss'  ; title music
@@ -200,8 +209,6 @@ MUSIC_DATA_END
 ;---------------------------------------------------
 
     org $3000
-screen
-    ins 'difficulties.bmp',+62
 DL
     :13 .by SKIP8
     .by MODEF+LMS
@@ -308,9 +315,8 @@ exit_tech_diff
     lda #$40
     sta $d40e   ; NMI On 
     cli         ; IRQ on
-    mva #0 DMACTLS
-    sta dmactl
-    ;jmp quiet   ; rts
+
+    ;jmp quiet   ; rts  ; POZOR PREMATURE OTTIMIZZAZIONE
  
 .proc quiet
     ldx #8
@@ -386,4 +392,7 @@ samples_end_h
     .by >sample_end2
     .by >sample_end4
 finito
+    org $b000 ; empty space I hope
+screen
+    ins 'difficulties.bmp',+62
     ini start

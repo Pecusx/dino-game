@@ -7,7 +7,7 @@ Code: [Pecus](https://github.com/Pecusx) and [pirx](https://github.com/pkali)
 
 Msx: Alex and Jochen Hippel
 
-Used portions of LZSS player by [DMSC](https://github.com/dmsc/lzss-sap)
+Used portions of LZSS player by [dmsc](https://github.com/dmsc/lzss-sap)
 
 Assembly:
 ```
@@ -18,4 +18,5 @@ cat intro/tech_diff.xex dino_.xex > tdc.xex; rm dino_.xex
 
 Stand-alone game (no intro):
 ```
-mads dino.asm -o:dino.xex -d:ALONE=1```
+mads dino.asm -o:dino.xex -d:ALONE=1
+```
