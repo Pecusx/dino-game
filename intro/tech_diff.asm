@@ -8,6 +8,7 @@
     .zpvar temp_b   .byte
     .zpvar temp_w2  .word
     .zpvar temp_w3  .word
+    .zpvar NTSCounter    .byte
 ;---------------------------------------------------
     icl '../lib/ATARISYS.ASM'
     icl '../lib/MACRO.ASM'
@@ -86,6 +87,9 @@ next_letter
 leet_end
     jsr StopMusic
     jsr wait_for_releasing_keyz
+        mva #0 dmactls      ; dark screen
+        ; and wait one frame :)
+        waitRTC
     rts
     
 
@@ -152,6 +156,7 @@ leet_speeks_h
     mwa #MUSIC_DATA_END song_end_ptr
     jsr init_song
     VMAIN VBLinterrupt,7       ; jsr SetVBL
+    mva #0 NTSCounter
     rts
 .endp
 .proc StopMusic
@@ -166,7 +171,21 @@ leet_speeks_h
     rts
 .endp
 .proc VBLinterrupt
+    ; music - PAL/NTSC check
+    lda PAL
+    and #%00001110
+    beq IsPAL
+    ; NTSC ...
+    inc NTSCounter
+    lda NTSCounter
+    cmp #5
+    bne PlayMusic
+    mva #0 NTSCounter
+    beq NoMusic
+PlayMusic
+IsPAL    
     jsr PLAYER
+NoMusic
     jmp XITVBV
 .endp  
 leet_screen 

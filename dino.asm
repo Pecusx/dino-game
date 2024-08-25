@@ -1,5 +1,5 @@
 SCR_HEIGHT = 8
-WORLD_LENGTH = 64
+WORLD_LENGTH = 48
 DIFF_LEVELS = 20
 .IFNDEF ALONE
     .def ALONE = 1 ; standalone version
@@ -25,6 +25,7 @@ swap_table=$0600    ; table for swap bytes in left characters :)
     .zpvar Hit              .byte
     .zpvar Level            .byte
     .zpvar play_flag        .byte
+    .zpvar NTSCounter       .byte
 ;---------------------------------------------------
     icl 'lib/ATARISYS.ASM'
     icl 'lib/MACRO.ASM'
@@ -72,12 +73,12 @@ status_line_addr
     :4 .byte SKIP8
     .byte MODE2
 
-    .byte SKIP8,SKIP8 ; empty lines
+    .byte SKIP8,SKIP8,SKIP8 ; empty lines
 
-    .rept SCR_HEIGHT, #
+    .rept SCR_HEIGHT-1, #
       .byte MODE2+LMS+SCH   ; gr.0+LMS+HSCRL
 line:1_addr
-        .word screen+$100*#
+        .word screen+$100*(#+1)
     .endr
     .byte JVB   
     .word GameDL
@@ -400,18 +401,19 @@ SwapLoop
     bpl @-
     rts
 .endp
+;-----------------------------------------------
 .proc ClearScreen
     ldy #44 ; visible screen len
     lda #0
 ClearLoop
-    sta screen+$0700,y
+    ;sta screen+$0700,y
     sta screen+$0600,y
     sta screen+$0500,y
     sta screen+$0400,y
     sta screen+$0300,y
     sta screen+$0200,y
     sta screen+$0100,y
-    sta screen+$0000,y
+    ;sta screen+$0000,y
     dey
     bne ClearLoop
     rts
@@ -1324,6 +1326,7 @@ pressed
 .proc PrepareMusicPlayer
     jsr StopMusic
     VMAIN VBLinterrupt,7       ; jsr SetVBL
+    mva #0 NTSCounter
     rts
 .endp
 .proc PlayInGameMusic
@@ -1348,9 +1351,23 @@ pressed
 .endp
 .proc VBLinterrupt
     lda play_flag
-    beq @+
+    beq NoMusic
+    ; music - PAL/NTSC check
+    lda PAL
+    and #%00001110
+    beq IsPAL
+    ; NTSC ...
+    inc NTSCounter
+    lda NTSCounter
+    cmp #5
+    bne PlayMusic
+    mva #0 NTSCounter
+    beq NoMusic
+PlayMusic
+IsPAL    
     jsr PLAYER
-@   pla
+NoMusic
+    pla
     tay
     pla
     tax
