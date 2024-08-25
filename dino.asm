@@ -128,6 +128,10 @@ WorldTable
     :WORLD_LENGTH+1 .byte 0 ; ground
 ;---------------------------------------------------
 FirstSTART
+        mva #0 dmactls             ; dark screen
+        mva #$ff portb
+        ; and wait one frame :)
+        waitRTC                   ; or waitRTC ?
     jsr ClearScreen
     jsr GenerateCharsets
     jsr GenerateClouds
