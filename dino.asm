@@ -446,7 +446,7 @@ NothingToDraw
     jsr ClearScreen
     ldx #0  ; start position (world)
     stx temp_b
-    lda #42 ; start position (screen)
+    lda #43 ; start position (screen)
     sta temp_b2
 ToScreenLoop
     lda WorldTable,x
