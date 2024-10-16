@@ -1424,9 +1424,11 @@ screen
     .align $100
 MUSIC1_DATA
     ins 'music/InGame.lzss'  ; ingame music
+    .ds 1
 MUSIC1_DATA_END
     .align $100
 MUSIC2_DATA
     ins 'music/GameOver.lzss'    ; game over music
+    .ds 1
 MUSIC2_DATA_END
     run FirstSTART
