@@ -1,5 +1,5 @@
 SCR_HEIGHT = 8
-WORLD_LENGTH = 48
+WORLD_LENGTH = 44
 DIFF_LEVELS = 20
 .IFNDEF ALONE
     .def ALONE = 1 ; standalone version
@@ -410,7 +410,7 @@ SwapLoop
 .endp
 ;-----------------------------------------------
 .proc ClearScreen
-    ldy #44 ; visible screen len
+    ldy #WORLD_LENGTH ; visible screen len
     lda #0
 ClearLoop
     ;sta screen+$0700,y
@@ -446,7 +446,7 @@ NothingToDraw
     jsr ClearScreen
     ldx #0  ; start position (world)
     stx temp_b
-    lda #43 ; start position (screen)
+    lda #WORLD_LENGTH-1 ; start position (screen)
     sta temp_b2
 ToScreenLoop
     lda WorldTable,x
@@ -455,10 +455,9 @@ ToScreenLoop
     ldx temp_b2
     jsr ShowObjectL
 NothingToDraw
-    dec temp_b2
     inc:ldx temp_b
-    cpx #WORLD_LENGTH
-    bne ToScreenLoop
+    dec temp_b2
+    bpl ToScreenLoop
     rts
 .endp
 ;-----------------------------------------------
